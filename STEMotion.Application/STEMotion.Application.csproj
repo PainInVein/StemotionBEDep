@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CustomEntities\" />
     <Folder Include="DTO\ResponseDTOs\" />
     <Folder Include="DTO\RequestDTOs\" />
+    <Folder Include="CustomEntities\" />
     <Folder Include="Helpers\" />
     <Folder Include="Interfaces\ServiceInterfaces\" />
     <Folder Include="Services\" />
