@@ -112,7 +112,8 @@ public partial class StemotionContext : DbContext
                 .HasColumnName("gradeLevel");
 
             entity.Property(e => e.AvatarUrl)
-                .HasColumnName("avatarUrl");
+                .HasColumnName("avatarUrl")
+                .IsRequired(false);
 
             entity.Property(e => e.Status)
                 .HasColumnName("status")

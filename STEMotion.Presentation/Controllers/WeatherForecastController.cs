@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace STEMotion.Presentation.Controllers
+namespace STEMotion.Application.Controllers
 {
     [ApiController]
     [Route("[controller]")]

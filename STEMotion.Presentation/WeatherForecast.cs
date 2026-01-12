@@ -1,4 +1,4 @@
-namespace STEMotion.Presentation
+namespace STEMotion.Application
 {
     public class WeatherForecast
     {
