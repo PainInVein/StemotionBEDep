@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace STEMotion.Domain.Entities;
-
-public partial class Chapter
+namespace STEMotion.Domain.Entities
 {
-    public string ChapterId { get; set; } = null!;
-
-    public string? SubjectId { get; set; }
-
-    public int? GradeLevel { get; set; }
-
-    public string? Title { get; set; }
-
-    public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
-
-    public virtual Subject? Subject { get; set; }
+    public class Chapter
+    {
+        public Guid ChapterId { get; set; }
+        public Guid SubjectId { get; set; }
+        public string Title { get; set; }
+        public virtual Subject Subject { get; set; }
+        public virtual ICollection<Lesson> Lessons { get; set; }
+    }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Domain.Entities;
+using STEMotion.Infrastructure.DBContext;
+using STEMotion.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +24,14 @@ namespace STEMotion.Infrastructure
 
         // IDisposable Implementation
         private bool disposed = false;
+
+        private IUserRepository _userRepository;
+
+        public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context);
+
+        private IRoleRepository _roleRepository;
+        public IRoleRepository RoleRepository => _roleRepository ??= new RoleRepository(_context);
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)

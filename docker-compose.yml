@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+   sqlserverdb:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+networks:
+  default:
+    name: STEMotion
+    driver: bridge
+volumes:
+  sqlserver_data:
+    name: sqlserver_data
