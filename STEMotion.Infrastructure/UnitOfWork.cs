@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Domain.Entities;
+using STEMotion.Infrastructure.DBContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;
