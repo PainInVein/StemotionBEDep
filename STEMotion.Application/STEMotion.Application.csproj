@@ -7,17 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DTO\ResponseDTOs\" />
-    <Folder Include="DTO\RequestDTOs\" />
-    <Folder Include="CustomEntities\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Interfaces\ServiceInterfaces\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.8" />
   </ItemGroup>
 
   <ItemGroup>
