@@ -12,8 +12,8 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    [Migration("20260112092906_ Update_Field Avatar_Url")]
-    partial class Update_FieldAvatar_Url
+    [Migration("20260115141558_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
