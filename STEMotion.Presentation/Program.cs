@@ -1,5 +1,6 @@
-using STEMotion.Infrastructure.Configuration;
 using STEMotion.Application.Extensions;
+using STEMotion.Infrastructure.Configuration;
+using STEMotion.Presentation.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,5 +14,6 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 app.UseInfrastructure();
+app.ApplyMigrations();
 
 app.Run();

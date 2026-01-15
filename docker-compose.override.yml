@@ -9,4 +9,4 @@ services:
     volumes:
         - sqlserver_data:/var/lib/sqlserver/data
     ports:
-        - "1435:1433"
+        - "1440:1433"
