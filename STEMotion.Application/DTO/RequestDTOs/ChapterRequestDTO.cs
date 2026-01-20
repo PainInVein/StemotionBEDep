@@ -9,8 +9,7 @@ namespace STEMotion.Application.DTO.RequestDTOs
     public class ChapterRequestDTO
     {
         public string SubjectName { get; set; }
-        public string GradeName { get; set; }
-
+        public int GradeLevel { get; set; }
         public string Title { get; set; }
     }
     public class UpdateChapterRequestDTO : ChapterRequestDTO

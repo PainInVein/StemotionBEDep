@@ -28,18 +28,30 @@ namespace STEMotion.Application.Services
         {
             try
             {
-                var existingLesson = await _unitOfWork.LessonRepository.ExistsAsync(x => x.Chapter.Title == requestDTO.ChapterName);
-                if (existingLesson)
+                var chapter = await _unitOfWork.ChapterRepository
+                .FindByCondition(c => c.Title.ToLower() == requestDTO.ChapterName.ToLower())
+                .FirstOrDefaultAsync();
+
+                if (chapter == null)
                 {
                     return new ResponseDTO<LessonResponseDTO>
                     {
                         IsSuccess = false,
-                        Message = "Chapter already exists.",
-                        Result = null
+                        Message = "Chapter not found"
                     };
                 }
+                var isDuplicate = await _unitOfWork.LessonRepository
+                .ExistsAsync(x => x.Title.ToLower() == requestDTO.Title.ToLower() && x.ChapterId == chapter.ChapterId);
+
+                if (isDuplicate)
+                    return new ResponseDTO<LessonResponseDTO>
+                    {
+                        IsSuccess = false,
+                        Message = "Chapter already exists."
+                    };
                 var lesson = _mapper.Map<Lesson>(requestDTO);
                 lesson.Status = "Active";
+                lesson.ChapterId = chapter.ChapterId;
                 var request = await _unitOfWork.LessonRepository.CreateAsync(lesson);
                 await _unitOfWork.SaveChangesAsync();
                 if (request == null)
@@ -47,7 +59,7 @@ namespace STEMotion.Application.Services
                     return new ResponseDTO<LessonResponseDTO>
                     {
                         IsSuccess = false,
-                        Message = "Grade created fail",
+                        Message = "Lesson created fail",
                         Result = null
                     };
                 }

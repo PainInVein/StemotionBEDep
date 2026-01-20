@@ -28,14 +28,19 @@ namespace STEMotion.Application.Middleware
                 .ReverseMap()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<Subject, SubjectResponseDTO>().ReverseMap();
+            CreateMap<Subject, SubjectResponseDTO>()
+                .ForMember(dest => dest.GradeLevel, opt => opt.MapFrom(src => src.Grade.GradeLevel))
+                .ReverseMap();
             CreateMap<SubjectRequestDTO, Subject>().ReverseMap();
             CreateMap<UpdateSubjectRequestDTO, Subject>()
                 .IgnoreAllNonExisting()
                 .ReverseMap()
+                .ForMember(dest => dest.GradeLevel, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<Chapter, ChapterResponseDTO>().ReverseMap();
+            CreateMap<Chapter, ChapterResponseDTO>()
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.Name))
+                .ReverseMap();
 
             CreateMap<ChapterRequestDTO, Chapter>().IgnoreAllNonExisting().ReverseMap();
             CreateMap<UpdateChapterRequestDTO, Chapter>().IgnoreAllNonExisting().ReverseMap();
