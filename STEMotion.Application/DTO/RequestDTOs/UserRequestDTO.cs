@@ -16,7 +16,6 @@ namespace STEMotion.Application.DTO.RequestDTOs
         public String? RoleName { get; set; } 
         public int? GradeLevel { get; set; }
         public string? AvatarUrl { get; set; }
-        public string Status { get; set; } = "Active";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
     

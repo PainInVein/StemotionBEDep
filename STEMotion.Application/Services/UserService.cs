@@ -59,6 +59,7 @@ namespace STEMotion.Application.Services
                 }
                 var entites = _mapper.Map<User>(user);
                 entites.RoleId = role.Id;
+                entites.Status = "Active";
                 entites.Password = _passwordService.HashPasswords(user.Password);
                 var newUser = await _unitOfWork.UserRepository.CreateAsync(entites);
                 await _unitOfWork.SaveChangesAsync();
@@ -122,7 +123,7 @@ namespace STEMotion.Application.Services
 
         public async Task<IEnumerable<ResponseDTO<UserResponseDTO>>> GetAllUsers()
         {
-            var items = await _unitOfWork.UserRepository.GetAllAsync(u => u.Role);
+            var items = await _unitOfWork.UserRepository.FindAllAsync(u => u.Role);
             var response = _mapper.Map<IEnumerable<UserResponseDTO>>(items);
 
             return response.Select(u => new ResponseDTO<UserResponseDTO>

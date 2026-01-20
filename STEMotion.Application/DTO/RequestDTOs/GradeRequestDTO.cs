@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace STEMotion.Domain.Entities
+namespace STEMotion.Application.DTO.RequestDTOs
 {
-    // Khối lớp: Lớp 1, Lớp 2, Lớp 3, ...
-    public class Grade
+    public class GradeRequestDTO
     {
-        public Guid GradeId { get; set; }
         public int GradeLevel { get; set; }
         public string Name { get; set; }
-        public string Status { get; set; }
-
         public string Description { get; set; }
-
+    }
+    public class UpdateGradeRequest : GradeRequestDTO
+    {
+        public string Status { get; set; }
     }
 }

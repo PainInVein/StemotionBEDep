@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STEMotion.Infrastructure.DBContext;
 
@@ -11,9 +12,11 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    partial class StemotionContextModelSnapshot : ModelSnapshot
+    [Migration("20260115144216_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,10 +32,6 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("chapter_id")
                         .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uniqueidentifier")
@@ -74,10 +73,6 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("GradeId");
 
                     b.HasIndex("GradeLevel")
@@ -102,10 +97,6 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("estimated_time");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -128,10 +119,6 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("student_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ParentId", "StudentId");
 
@@ -159,9 +146,8 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit")
                         .HasColumnName("status");
 
                     b.HasKey("Id");
@@ -194,10 +180,6 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectId");
 

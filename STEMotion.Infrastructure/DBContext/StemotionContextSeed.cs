@@ -49,21 +49,21 @@ namespace STEMotion.Infrastructure.DBContext
                   Id = new Guid(),
                   Name = "Admin",
                   Description = "Admin",
-                  Status = true
+                  Status = "Active"
                 },
                 new()
                 {
                     Id= new Guid(),
-                    Name = "Học sinh",
+                    Name = "Student",
                     Description = "Học sinh",
-                    Status = true
+                    Status = "Active"
                 },
                 new()
                 {
                     Id= new Guid(),
-                    Name = "Phụ huynh",
+                    Name = "Parent",
                     Description = "Phụ huynh",
-                    Status = true
+                    Status = "Active"
                 }
             };
         }
