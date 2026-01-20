@@ -44,13 +44,13 @@ namespace STEMotion.Application.Services
 
                 var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
                                       x.GradeId == grade.GradeId
-                                      && x.Name.ToLower() == requestDTO.Name.ToLower());
+                                      && x.SubjectName.ToLower() == requestDTO.SubjectName.ToLower());
                 if (existing)
                 {
                     return new ResponseDTO<SubjectResponseDTO>
                     {
                         IsSuccess = false,
-                        Message = $"Subject '{requestDTO.Name}' already exists in Grade {requestDTO.GradeLevel}.",
+                        Message = $"Subject '{requestDTO.SubjectName}' already exists in Grade {requestDTO.GradeLevel}.",
                         Result = null
                     };
                 }
@@ -197,11 +197,11 @@ namespace STEMotion.Application.Services
                     subject.GradeId = newGrade.GradeId;
                     subject.Grade = newGrade;
                 }
-                if (subject.Name != requestDTO.Name || subject.Grade.GradeLevel != requestDTO.GradeLevel)
+                if (subject.SubjectName != requestDTO.SubjectName || subject.Grade.GradeLevel != requestDTO.GradeLevel)
                 {
                     var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
                         x.GradeId == subject.GradeId &&
-                        x.Name.ToLower() == requestDTO.Name.ToLower() &&
+                        x.SubjectName.ToLower() == requestDTO.SubjectName.ToLower() &&
                         x.SubjectId != id);
 
                     if (existing)
@@ -209,7 +209,7 @@ namespace STEMotion.Application.Services
                         return new ResponseDTO<SubjectResponseDTO>
                         {
                             IsSuccess = false,
-                            Message = $"Subject '{requestDTO.Name}' already exists in Grade {requestDTO.GradeLevel}.",
+                            Message = $"Subject '{requestDTO.SubjectName}' already exists in Grade {requestDTO.GradeLevel}.",
                             Result = null
                         };
                     }

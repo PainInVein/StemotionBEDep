@@ -51,7 +51,7 @@ namespace STEMotion.Application.Services
                     };
                 }
                 var subject = await _unitOfWork.SubjectRepository
-                    .FindByCondition(s => s.Name.ToLower() == requestDTO.SubjectName.ToLower()
+                    .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
                                          && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
 
                 if (subject == null)
@@ -63,7 +63,7 @@ namespace STEMotion.Application.Services
                         Result = null
                     };
                 }
-                var existingChapter = await _unitOfWork.ChapterRepository.ExistsAsync(x => x.Title.ToLower().Equals(requestDTO.Title.ToLower()));
+                var existingChapter = await _unitOfWork.ChapterRepository.ExistsAsync(x => x.ChapterName.ToLower().Equals(requestDTO.ChapterName.ToLower()));
                 if (existingChapter)
                 {
                     return new ResponseDTO<ChapterResponseDTO>
@@ -88,7 +88,6 @@ namespace STEMotion.Application.Services
                     };
                 }
                 var response = _mapper.Map<ChapterResponseDTO>(request);
-                response.SubjectName = subject.Name;
                 return new ResponseDTO<ChapterResponseDTO>
                 {
                     IsSuccess = true,
@@ -116,7 +115,6 @@ namespace STEMotion.Application.Services
                     return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Not found" };
                 }
                 var response = _mapper.Map<ChapterResponseDTO>(chapter);
-                response.SubjectName = chapter.Subject.Name;
                 return new ResponseDTO<ChapterResponseDTO>
                 {
                     IsSuccess = true,
@@ -153,14 +151,14 @@ namespace STEMotion.Application.Services
                     return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Grade level not found" };
 
                 var subject = await _unitOfWork.SubjectRepository
-                   .FindByCondition(s => s.Name.ToLower() == requestDTO.SubjectName.ToLower()
+                   .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
                                     && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
 
                 if (subject == null)
                     return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Subject not found in this Grade" };
 
                 var isDuplicate = await _unitOfWork.ChapterRepository
-                  .ExistsAsync(x => x.Title.ToLower() == requestDTO.Title.ToLower() && x.ChapterId != id);
+                  .ExistsAsync(x => x.ChapterName.ToLower() == requestDTO.ChapterName.ToLower() && x.ChapterId != id);
 
                 if (isDuplicate)
                     return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Chapter title already exists" };

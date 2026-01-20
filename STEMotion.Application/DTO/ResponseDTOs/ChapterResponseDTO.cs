@@ -9,10 +9,11 @@ namespace STEMotion.Application.DTO.ResponseDTOs
     public class ChapterResponseDTO
     {
         public Guid ChapterId { get; set; }
-        //public Guid SubjectId { get; set; }
         public string SubjectName { get; set; }
 
-        public string Title { get; set; }
+        public string ChapterName { get; set; }
+
+        //public string Title { get; set; }
         public string Status { get; set; }
     }
 }
