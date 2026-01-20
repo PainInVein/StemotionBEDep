@@ -191,7 +191,7 @@ public partial class StemotionContext : DbContext
                 .HasColumnName("grade_id")
                 .IsRequired();
 
-            entity.Property(e => e.Name)
+            entity.Property(e => e.SubjectName)
                 .HasColumnName("name")
                 .HasMaxLength(255);
 
@@ -218,8 +218,8 @@ public partial class StemotionContext : DbContext
                 .HasColumnName("subject_id")
                 .IsRequired();
 
-            entity.Property(e => e.Title)
-                .HasColumnName("title")
+            entity.Property(e => e.ChapterName)
+                .HasColumnName("chapter_name")
                 .HasMaxLength(255);
 
             entity.HasOne(c => c.Subject)
@@ -242,8 +242,8 @@ public partial class StemotionContext : DbContext
                 .HasColumnName("chapter_id")
                 .IsRequired();
 
-            entity.Property(e => e.Title)
-                .HasColumnName("title")
+            entity.Property(e => e.LessonName)
+                .HasColumnName("lessonName")
                 .HasMaxLength(255);
 
             entity.Property(e => e.EstimatedTime)

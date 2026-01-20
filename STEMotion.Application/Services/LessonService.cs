@@ -29,7 +29,7 @@ namespace STEMotion.Application.Services
             try
             {
                 var chapter = await _unitOfWork.ChapterRepository
-                .FindByCondition(c => c.Title.ToLower() == requestDTO.ChapterName.ToLower())
+                .FindByCondition(c => c.ChapterName.ToLower() == requestDTO.ChapterName.ToLower())
                 .FirstOrDefaultAsync();
 
                 if (chapter == null)
@@ -41,7 +41,7 @@ namespace STEMotion.Application.Services
                     };
                 }
                 var isDuplicate = await _unitOfWork.LessonRepository
-                .ExistsAsync(x => x.Title.ToLower() == requestDTO.Title.ToLower() && x.ChapterId == chapter.ChapterId);
+                .ExistsAsync(x => x.LessonName.ToLower() == requestDTO.LessonName.ToLower() && x.ChapterId == chapter.ChapterId);
 
                 if (isDuplicate)
                     return new ResponseDTO<LessonResponseDTO>
@@ -64,6 +64,7 @@ namespace STEMotion.Application.Services
                     };
                 }
                 var response = _mapper.Map<LessonResponseDTO>(request);
+                response.ChapterName = chapter.ChapterName;
                 return new ResponseDTO<LessonResponseDTO>
                 {
                     IsSuccess = true,
@@ -118,7 +119,7 @@ namespace STEMotion.Application.Services
 
         public async Task<IEnumerable<ResponseDTO<LessonResponseDTO>>> GetAllLesson()
         {
-            var lesson = _unitOfWork.LessonRepository.FindAll();
+            var lesson = await _unitOfWork.LessonRepository.FindAllAsync(x => x.Chapter);
             var response = _mapper.Map<IEnumerable<LessonResponseDTO>>(lesson);
             return response.Select(lessons => new ResponseDTO<LessonResponseDTO>
             {
@@ -132,7 +133,7 @@ namespace STEMotion.Application.Services
         {
             try
             {
-                var result = await _unitOfWork.LessonRepository.FindByCondition(x => x.LessonId == id).FirstOrDefaultAsync();
+                var result = await _unitOfWork.LessonRepository.FindByCondition(x => x.LessonId == id, false, x => x.Chapter).FirstOrDefaultAsync();
                 if (result == null)
                 {
                     return new ResponseDTO<LessonResponseDTO>
@@ -164,17 +165,17 @@ namespace STEMotion.Application.Services
         {
             try
             {
-                var lesson = await _unitOfWork.GradeRepository.GetByIdAsync(id);
+                var lesson = await _unitOfWork.LessonRepository.GetByIdAsync(id);
                 if (lesson == null)
                 {
                     return new ResponseDTO<LessonResponseDTO>
                     {
                         IsSuccess = false,
-                        Message = "Grade not found"
+                        Message = "Lesson not found"
                     };
                 }
                 _mapper.Map(requestDTO, lesson);
-                _unitOfWork.GradeRepository.Update(lesson);
+                _unitOfWork.LessonRepository.Update(lesson);
                 await _unitOfWork.SaveChangesAsync();
                 var response = _mapper.Map<LessonResponseDTO>(lesson);
                 return new ResponseDTO<LessonResponseDTO>

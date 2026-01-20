@@ -9,8 +9,8 @@ namespace STEMotion.Application.DTO.ResponseDTOs
     public class LessonResponseDTO
     {
         public Guid LessonId { get; set; }
-        public Guid ChapterId { get; set; }
-        public string Title { get; set; }
+        public string ChapterName { get; set; }
+        public string LessonName { get; set; }
         public int? EstimatedTime { get; set; }
         public string Status { get; set; }  
     }
