@@ -4,16 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace STEMotion.Domain.Entities
+namespace STEMotion.Application.DTO.ResponseDTOs
 {
-    public class Subject
+    public class SubjectResponseDTO
     {
         public Guid SubjectId { get; set; }
-        public Guid GradeId { get; set; }
-        public string Name { get; set; }
+        public string GradeName { get; set; }
+        public string SubjectName { get; set; }
         public string Description { get; set; }
         public string Status { get; set; }
-        public virtual Grade Grade { get; set; }
-        public virtual ICollection<Chapter> Chapters { get; set; }
     }
 }

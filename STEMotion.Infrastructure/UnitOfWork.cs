@@ -32,6 +32,16 @@ namespace STEMotion.Infrastructure
         private IRoleRepository _roleRepository;
         public IRoleRepository RoleRepository => _roleRepository ??= new RoleRepository(_context);
 
+        private IGradeRepository _gradeRepository;
+        public IGradeRepository GradeRepository => _gradeRepository ??= new GradeRepository(_context);
+
+        private ISubjectRepository _subjectRepository;
+        public ISubjectRepository SubjectRepository => _subjectRepository ??= new SubjectRepository(_context);
+        private IChapterRepository _chapterRepository;
+        public IChapterRepository ChapterRepository => _chapterRepository ??= new ChapterRepository(_context);
+        private ILessonRepository _lessonRepository;
+        public ILessonRepository LessonRepository => _lessonRepository ??= new LessonRepository(_context);
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)
