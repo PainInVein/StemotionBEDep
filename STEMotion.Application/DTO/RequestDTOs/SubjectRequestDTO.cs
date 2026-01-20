@@ -8,8 +8,8 @@ namespace STEMotion.Application.DTO.RequestDTOs
 {
     public class SubjectRequestDTO
     {
-        public string GradeName { get; set; }
-        public string SubjectName { get; set; }
+        public int GradeLevel { get; set; }
+        public string Name { get; set; }
         public string Description { get; set; }
     }
     public class UpdateSubjectRequestDTO : SubjectRequestDTO

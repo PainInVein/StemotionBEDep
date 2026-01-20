@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
@@ -18,27 +19,44 @@ namespace STEMotion.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public SubjectService(IUnitOfWork unitOfWork)
+        public SubjectService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<ResponseDTO<SubjectResponseDTO>> CreateSubject(SubjectRequestDTO requestDTO)
         {
             try
             {
-                var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x => x.Grade.Name.Equals(requestDTO.GradeName, StringComparison.OrdinalIgnoreCase) && x.Name.Equals(requestDTO.SubjectName, StringComparison.OrdinalIgnoreCase));
+                var grade = await _unitOfWork.GradeRepository
+                                             .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel)
+                                             .FirstOrDefaultAsync();
+                if (grade == null)
+                {
+                    return new ResponseDTO<SubjectResponseDTO>
+                    {
+                        IsSuccess = false,
+                        Message = $"Grade level {requestDTO.GradeLevel} not found.",
+                        Result = null
+                    };
+                }
+
+                var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
+                                      x.GradeId == grade.GradeId
+                                      && x.Name.ToLower() == requestDTO.Name.ToLower());
                 if (existing)
                 {
                     return new ResponseDTO<SubjectResponseDTO>
                     {
                         IsSuccess = false,
-                        Message = "Subject already exists.",
+                        Message = $"Subject '{requestDTO.Name}' already exists in Grade {requestDTO.GradeLevel}.",
                         Result = null
                     };
                 }
                 var subject = _mapper.Map<Subject>(requestDTO);
                 subject.Status = "Active";
+                subject.GradeId = grade.GradeId;
                 var request = await _unitOfWork.SubjectRepository.CreateAsync(subject);
                 await _unitOfWork.SaveChangesAsync();
                 if (request == null)
@@ -51,6 +69,7 @@ namespace STEMotion.Application.Services
                     };
                 }
                 var response = _mapper.Map<SubjectResponseDTO>(request);
+                response.GradeLevel = grade.GradeLevel;
                 return new ResponseDTO<SubjectResponseDTO>
                 {
                     IsSuccess = true,
@@ -104,7 +123,7 @@ namespace STEMotion.Application.Services
 
         public async Task<IEnumerable<ResponseDTO<SubjectResponseDTO>>> GetAllSubject()
         {
-            var subject = _unitOfWork.SubjectRepository.FindAll();
+            var subject = await _unitOfWork.SubjectRepository.FindAllAsync(x => x.Grade);
             var response = _mapper.Map<IEnumerable<SubjectResponseDTO>>(subject);
             return response.Select(subject => new ResponseDTO<SubjectResponseDTO>
             {
@@ -118,7 +137,7 @@ namespace STEMotion.Application.Services
         {
             try
             {
-                var result = _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id);
+                var result =  await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id,false, x => x.Grade).FirstOrDefaultAsync();
                 if (result == null)
                 {
                     return new ResponseDTO<SubjectResponseDTO>
@@ -150,14 +169,50 @@ namespace STEMotion.Application.Services
         {
             try
             {
-                var subject = await _unitOfWork.SubjectRepository.GetByIdAsync(id);
+                var subject = await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id, false, s => s.Grade).FirstOrDefaultAsync();
                 if (subject == null)
                 {
                     return new ResponseDTO<SubjectResponseDTO>
                     {
                         IsSuccess = false,
-                        Message = "Grade not found"
+                        Message = "Subject not found"
                     };
+                }
+                if (subject.Grade.GradeLevel != requestDTO.GradeLevel)
+                {
+                    var newGrade = await _unitOfWork.GradeRepository
+                        .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel)
+                        .FirstOrDefaultAsync();
+
+                    if (newGrade == null)
+                    {
+                        return new ResponseDTO<SubjectResponseDTO>
+                        {
+                            IsSuccess = false,
+                            Message = $"Grade level {requestDTO.GradeLevel} not found.",
+                            Result = null
+                        };
+                    }
+
+                    subject.GradeId = newGrade.GradeId;
+                    subject.Grade = newGrade;
+                }
+                if (subject.Name != requestDTO.Name || subject.Grade.GradeLevel != requestDTO.GradeLevel)
+                {
+                    var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
+                        x.GradeId == subject.GradeId &&
+                        x.Name.ToLower() == requestDTO.Name.ToLower() &&
+                        x.SubjectId != id);
+
+                    if (existing)
+                    {
+                        return new ResponseDTO<SubjectResponseDTO>
+                        {
+                            IsSuccess = false,
+                            Message = $"Subject '{requestDTO.Name}' already exists in Grade {requestDTO.GradeLevel}.",
+                            Result = null
+                        };
+                    }
                 }
                 _mapper.Map(requestDTO, subject);
                 _unitOfWork.SubjectRepository.Update(subject);
@@ -170,7 +225,7 @@ namespace STEMotion.Application.Services
                     Result = response
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ResponseDTO<SubjectResponseDTO>
                 {
