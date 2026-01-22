@@ -10,6 +10,8 @@ namespace STEMotion.Domain.Entities
     {
         public Guid ParentId { get; set; }
         public Guid StudentId { get; set; }
+        public string Status { get; set; }
+
         public virtual User Parent { get; set; }
         public virtual User Student { get; set; }
     }

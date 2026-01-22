@@ -36,7 +36,36 @@ namespace STEMotion.Infrastructure.Repositories
         /// Deletes an entity from the database.
         /// </summary>
         /// <param name="entity"></param>
-        public void Delete(T entity) => _dbSet.Remove(entity);
+        //public void Delete(T entity) => _dbSet.Remove(entity);
+        public void Delete(T entity)
+        {
+            var statusProperty = typeof(T).GetProperty("Status",
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.IgnoreCase);
+
+            if (statusProperty != null && statusProperty.CanWrite)
+            {
+                var propertyType = statusProperty.PropertyType;
+
+                if (propertyType == typeof(string))
+                {
+                    statusProperty.SetValue(entity, "InActive");
+                    _dbSet.Update(entity);
+                }
+                else if (propertyType == typeof(bool))
+                {
+                    statusProperty.SetValue(entity, false);
+                    _dbSet.Update(entity);
+                }
+            }
+            else
+            {
+                _dbSet.Remove(entity);
+            }
+        }
+
+
 
         /// <summary>
         /// Checks if any entity exists in the database that matches the given predicate asynchronously. Predicate is a condition to filter entities.
@@ -46,11 +75,42 @@ namespace STEMotion.Infrastructure.Repositories
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate) => await _dbSet.AnyAsync(predicate);
 
         /// <summary>
+        ///  Find All not include
+        /// </summary>
+        /// <param name="trackChanges"></param>
+        /// <returns></returns>
+
+        /// <summary>
         /// Collects all entities that match the given predicate asynchronously. Predicate is a condition to filter entities.
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) => await _dbSet.Where(predicate).ToListAsync();
+
+
+        /// <summary>
+        /// Find By Conditon (Ko can await/async)
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="trackChanges"></param>
+        /// <returns></returns>
+        public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false) => !trackChanges ? _context.Set<T>().Where(expression).AsNoTracking()
+        : _context.Set<T>().Where(expression);
+
+
+        /// <summary>
+        /// Find By Conditon co include (Ko can await/async)
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="trackChanges"></param>
+        /// <param name="includeProperties"></param>
+        /// <returns></returns>
+        public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false, params Expression<Func<T, object>>[] includeProperties)
+        {
+            var item = FindByCondition(expression, trackChanges);
+            item = includeProperties.Aggregate(item, (current, includeProperty) => current.Include(includeProperty));
+            return item;
+        }
 
 
         /// <summary>
@@ -80,7 +140,7 @@ namespace STEMotion.Infrastructure.Repositories
         /// </summary>
         /// <returns></returns>
         //public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
-        public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
+        public async Task<IEnumerable<T>> FindAllAsync(params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
 
@@ -95,6 +155,14 @@ namespace STEMotion.Infrastructure.Repositories
 
             return await query.ToListAsync();
         }
+
+        /// <summary>
+        /// Find All (Ko include => ko await/async)
+        /// </summary>
+        /// <param name="trackChanges"></param>
+        /// <returns></returns>
+        public IQueryable<T> FindAll(bool trackChanges = false) => !trackChanges ? _context.Set<T>().AsNoTracking()
+             : _context.Set<T>();
 
         /// <summary>
         /// Gets an entity by its unique identifier asynchronously. 

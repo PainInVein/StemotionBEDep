@@ -12,8 +12,8 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    [Migration("20260112092906_ Update_Field Avatar_Url")]
-    partial class Update_FieldAvatar_Url
+    [Migration("20260119100529_ThanhDT_Add_Property_Status")]
+    partial class ThanhDT_Add_Property_Status
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,10 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("chapter_id")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uniqueidentifier")
@@ -73,6 +77,10 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("GradeId");
 
                     b.HasIndex("GradeLevel")
@@ -97,6 +105,10 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("estimated_time");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -119,6 +131,10 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("student_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ParentId", "StudentId");
 
@@ -146,8 +162,9 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit")
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
                     b.HasKey("Id");
@@ -180,6 +197,10 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectId");
 

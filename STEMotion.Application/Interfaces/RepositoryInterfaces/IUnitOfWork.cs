@@ -11,6 +11,14 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
         IUserRepository UserRepository { get; }
         
         IRoleRepository RoleRepository { get; }
+
+        IGradeRepository GradeRepository { get; }
+
+        ISubjectRepository SubjectRepository { get; }
+
+        IChapterRepository ChapterRepository { get; }
+
+        ILessonRepository LessonRepository { get; }
         Task<int> SaveChangesAsync();
     }
 }

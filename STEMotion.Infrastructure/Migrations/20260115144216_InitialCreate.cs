@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace STEMotion.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class ThanhDT_Init_Data : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,7 +71,7 @@ namespace STEMotion.Infrastructure.Migrations
                     lastName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     roleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     gradeLevel = table.Column<int>(type: "int", nullable: true),
-                    avatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    avatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     createdAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
                 },
