@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
+using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,16 +22,16 @@ namespace STEMotion.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllLesson()
         {
-            var lessons = await _lessonService.GetAllLesson();
-            return Ok(lessons);
+            var result = await _lessonService.GetAllLesson();
+            return Ok(ResponseDTO<IEnumerable<LessonResponseDTO>>.Success(result, "Lấy danh sách bài học thành công"));
         }
 
         [EndpointDescription("API này lấy Lesson theo Id")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLessonByIdAsync(Guid id)
         {
-            var lesson = await _lessonService.GetLessonById(id);
-            return Ok(lesson);
+            var result = await _lessonService.GetLessonById(id);
+            return Ok(ResponseDTO<LessonResponseDTO>.Success(result, "Tìm thấy thông tin bài học"));
         }
 
         [EndpointDescription("API này để tạo Lesson")]
@@ -38,7 +39,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> CreateLesson([FromBody] LessonRequestDTO createLessonRequest)
         {
             var result = await _lessonService.CreateLesson(createLessonRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<LessonResponseDTO>.Success(result, "Tạo bài học mới thành công"));
         }
 
         [EndpointDescription("API này để sửa Lesson theo Id")]
@@ -46,7 +47,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> UpdateLesson(Guid id, [FromBody] UpdateLessonRequestDTO updateLessonRequest)
         {
             var result = await _lessonService.UpdateLesson(id, updateLessonRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<LessonResponseDTO>.Success(result, "Cập nhật bài học thành công"));
         }
 
         [EndpointDescription("API này để xóa Lesson theo Id")]
@@ -54,7 +55,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> DeleteLesson(Guid id)
         {
             var result = await _lessonService.DeleteLesson(id);
-            return Ok(result);
+            return Ok(ResponseDTO<bool>.Success(result, "Xóa bài học thành công"));
         }
     }
 }

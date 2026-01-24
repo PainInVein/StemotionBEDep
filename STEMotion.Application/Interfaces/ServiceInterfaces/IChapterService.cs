@@ -10,10 +10,10 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface IChapterService
     {
-        Task<IEnumerable<ResponseDTO<ChapterResponseDTO>>> GetAllChapter();
-        Task<ResponseDTO<ChapterResponseDTO>> GetChapterById(Guid id);
-        Task<ResponseDTO<ChapterResponseDTO>> CreateChapter(ChapterRequestDTO requestDTO);
-        Task<ResponseDTO<ChapterResponseDTO>> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO);
-        Task<ResponseDTO<bool>> DeleteChapter(Guid id);
+        Task<IEnumerable<ChapterResponseDTO>> GetAllChapter();
+        Task<ChapterResponseDTO> GetChapterById(Guid id);
+        Task<ChapterResponseDTO> CreateChapter(ChapterRequestDTO requestDTO);
+        Task<ChapterResponseDTO> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO);
+        Task<bool> DeleteChapter(Guid id);
     }
 }

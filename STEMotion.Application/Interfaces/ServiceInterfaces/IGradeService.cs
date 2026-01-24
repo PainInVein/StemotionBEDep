@@ -10,10 +10,10 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface IGradeService
     {
-        Task<IEnumerable<ResponseDTO<GradeResponseDTO>>> GetAllGrade();
-        Task<ResponseDTO<GradeResponseDTO>> GetGradeById(Guid id);
-        Task<ResponseDTO<GradeResponseDTO>> CreateGrade(GradeRequestDTO requestDTO);
-        Task<ResponseDTO<GradeResponseDTO>> UpdateGrade(Guid id, UpdateGradeRequest requestDTO);
-        Task<ResponseDTO<bool>> DeleteGrade(Guid id);
+        Task<IEnumerable<GradeResponseDTO>> GetAllGrade();
+        Task<GradeResponseDTO> GetGradeById(Guid id);
+        Task<GradeResponseDTO> CreateGrade(GradeRequestDTO requestDTO);
+        Task<GradeResponseDTO> UpdateGrade(Guid id, UpdateGradeRequest requestDTO);
+        Task<bool> DeleteGrade(Guid id);
     }
 }
