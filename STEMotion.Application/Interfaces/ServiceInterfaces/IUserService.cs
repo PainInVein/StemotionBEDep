@@ -16,6 +16,13 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         Task<ResponseDTO<UserResponseDTO>> UpdateUser(Guid id, UpdateUserRequestDTO user);
         Task<ResponseDTO<bool>> DeleteUser(Guid id);
         Task<ResponseDTO<string>> LoginUser(LoginRequestDTO loginRequest);
-        Task<ResponseDTO<bool>> ChangePassword(Guid userId, ChangePasswordRequestDTO changePasswordRequest);    
+        Task<ResponseDTO<bool>> ChangePassword(Guid userId, ChangePasswordRequestDTO changePasswordRequest);
+
+        Task<ResponseDTO<string>> AuthenticateGoogleUserAsync(GoogleRequestDTO googleRequestDTO);
+
+        Task<ResponseDTO<string>> RequestRegistrationOtpAsync(CreateUserRequestDTO createUserRequest);
+
+        Task<ResponseDTO<string>> RequestPasswordResetOtpAsync(string email);
+        Task<ResponseDTO<UserResponseDTO>> VerifyOtpAndRegisterAsync(string email, string otpCode);
     }
 }

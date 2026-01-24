@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 services:
   sqlserverdb:
     container_name: sqlserverdb
@@ -10,3 +10,8 @@ services:
         - sqlserver_data:/var/lib/sqlserver/data
     ports:
         - "1440:1433"
+  redis:
+    container_name: redis-stemotion
+    restart: always
+    ports:
+      - "6789:6379"

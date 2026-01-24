@@ -52,6 +52,11 @@ namespace STEMotion.Application.Middleware
 
             CreateMap<LessonRequestDTO, Lesson>().IgnoreAllNonExisting().ReverseMap();
             CreateMap<UpdateLessonRequestDTO, Lesson>().IgnoreAllNonExisting().ReverseMap();
+
+            CreateMap<GoogleRequestDTO, User>()
+                .IgnoreAllNonExisting()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Active"))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now));
         }
     }
 }

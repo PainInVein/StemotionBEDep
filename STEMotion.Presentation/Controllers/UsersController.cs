@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,7 +17,7 @@ namespace STEMotion.Application.Controllers
     {
         private readonly IUserService _userService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
         }
@@ -60,14 +64,6 @@ namespace STEMotion.Application.Controllers
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var result = await _userService.DeleteUser(id);
-            return Ok(result);
-        }
-
-        [EndpointDescription("API này đăng nhập User")]
-        [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
-        {
-            var result = await _userService.LoginUser(loginRequestDTO);
             return Ok(result);
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace STEMotion.Application.Extensions
+﻿namespace STEMotion.Presentation.Extensions
 {
     public static class ApplicationExtensions
     {
@@ -10,6 +10,7 @@
               app.UseRouting();
             */
             // app.UseHttpsRedirection(); // for production only
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 
