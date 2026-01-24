@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
+using STEMotion.Application.Exceptions;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Application.Services;
@@ -35,7 +36,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
             var result = await _userService.LoginUser(loginRequestDTO);
-            return Ok(result);
+            return Ok(ResponseDTO<string>.Success(result, "Đăng nhập thành công"));
         }
 
         [HttpGet("google-login")]
@@ -57,9 +58,7 @@ namespace STEMotion.Presentation.Controllers
             var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
 
             if (!result.Succeeded)
-            {
-                return BadRequest(new { message = "Google authentication failed" });
-            }
+                throw new UnauthorizedException("Google authentication failed");
 
             result.Properties.Items.TryGetValue("RoleName", out var roleName);
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
@@ -72,18 +71,8 @@ namespace STEMotion.Presentation.Controllers
                 AvatarUrl = claims?.FirstOrDefault(c => c.Type == "picture")?.Value,
                 RoleName = roleName
             };
-            if (string.IsNullOrEmpty(googleRequestDTO.Email))
-            {
-                return BadRequest(new { message = "Email not found in Google account" });
-            }
 
             var response = await _userService.AuthenticateGoogleUserAsync(googleRequestDTO);
-
-            if (!response.IsSuccess)
-            {
-                return Redirect($"http://localhost:5173/login-error?message={response.Message}");
-            }
-
             //var token = response.Result;
             //return Redirect($"http://localhost:5173/login-success?token={token}");
             var cookieOptions = new CookieOptions
@@ -94,7 +83,7 @@ namespace STEMotion.Presentation.Controllers
                 Expires = DateTime.UtcNow.AddHours(24)
             };
 
-            Response.Cookies.Append("accessToken", response.Result, cookieOptions);
+            Response.Cookies.Append("accessToken", response, cookieOptions);
             return Redirect("http://localhost:5173");
         }
 
@@ -102,52 +91,33 @@ namespace STEMotion.Presentation.Controllers
         [EndpointDescription("Bước 1: Gửi mã OTP để xác thực email khi đăng ký (FE phải gửi roleName: student hoặc parent)")]
         public async Task<IActionResult> SendRegistrationOtp([FromBody] CreateUserRequestDTO request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            // Validate roleName
-            if (string.IsNullOrEmpty(request.RoleName))
-                return BadRequest(new ResponseDTO<string>("RoleName là bắt buộc (student hoặc parent)", false, null));
-
-            var result = await _userService.RequestRegistrationOtpAsync(request);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            await _userService.RequestRegistrationOtpAsync(request);
+            return Ok(ResponseDTO<object>.Success(null, "Mã OTP đã được gửi"));
         }
 
         [HttpPost("register/verify-otp")]
         [EndpointDescription("Bước 2: Xác thực OTP và tạo tài khoản")]
         public async Task<IActionResult> VerifyOtpAndRegister([FromBody] OtpVerificationRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var result = await _userService.VerifyOtpAndRegisterAsync(request.Email, request.OtpCode);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Đăng ký thành công"));
         }
 
         [HttpPost("password/send-otp")]
         [EndpointDescription("Bước 1: Gửi mã OTP để đổi mật khẩu")]
         public async Task<IActionResult> SendPasswordResetOtp([FromBody] OtpRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _userService.RequestPasswordResetOtpAsync(request.Email);
-            return result.IsSuccess ? Ok(result) : NotFound(result);
+            await _userService.RequestPasswordResetOtpAsync(request.Email);
+            return Ok(ResponseDTO<object>.Success(null, "Mã OTP đặt lại mật khẩu đã được gửi"));
         }
         [HttpPost("password/reset")]
         [EndpointDescription("Bước 2: Xác thực OTP và đổi mật khẩu")]
         public async Task<IActionResult> ResetPassword([FromBody] ChangePasswordRequestDTO request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (user is null)
-                return NotFound(new ResponseDTO<bool>("Không tìm thấy User.", false, false));
-
-            var result = await _userService.ChangePassword(user.UserId, request);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            var result = await _userService.ChangePassword(request);
+            return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Đổi mật khẩu thành công"));
         }
     }
 }
+
 

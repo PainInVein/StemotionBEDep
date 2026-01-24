@@ -10,19 +10,19 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface IUserService
     {
-        Task<IEnumerable<ResponseDTO<UserResponseDTO>>> GetAllUsers();
-        Task<ResponseDTO<UserResponseDTO>> GetUserById(Guid id);
-        Task<ResponseDTO<UserResponseDTO>> CreateUser(CreateUserRequestDTO user);
-        Task<ResponseDTO<UserResponseDTO>> UpdateUser(Guid id, UpdateUserRequestDTO user);
-        Task<ResponseDTO<bool>> DeleteUser(Guid id);
-        Task<ResponseDTO<string>> LoginUser(LoginRequestDTO loginRequest);
-        Task<ResponseDTO<bool>> ChangePassword(Guid userId, ChangePasswordRequestDTO changePasswordRequest);
+        Task<IEnumerable<UserResponseDTO>> GetAllUsers();
+        Task<UserResponseDTO> GetUserById(Guid id);
+        Task<UserResponseDTO> CreateUser(CreateUserRequestDTO user);
+        Task<UserResponseDTO> UpdateUser(Guid id, UpdateUserRequestDTO user);
+        Task<bool> DeleteUser(Guid id);
+        Task<string> LoginUser(LoginRequestDTO loginRequest);
+        Task<UserResponseDTO> ChangePassword(ChangePasswordRequestDTO request);
 
-        Task<ResponseDTO<string>> AuthenticateGoogleUserAsync(GoogleRequestDTO googleRequestDTO);
+        Task<string> AuthenticateGoogleUserAsync(GoogleRequestDTO googleRequestDTO);
 
-        Task<ResponseDTO<string>> RequestRegistrationOtpAsync(CreateUserRequestDTO createUserRequest);
+        Task RequestRegistrationOtpAsync(CreateUserRequestDTO createUserRequest);
 
-        Task<ResponseDTO<string>> RequestPasswordResetOtpAsync(string email);
-        Task<ResponseDTO<UserResponseDTO>> VerifyOtpAndRegisterAsync(string email, string otpCode);
+        Task RequestPasswordResetOtpAsync(string email);
+        Task<UserResponseDTO> VerifyOtpAndRegisterAsync(string email, string otpCode);
     }
 }

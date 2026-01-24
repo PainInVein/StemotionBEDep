@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
+using STEMotion.Application.Exceptions;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Domain.Entities;
@@ -25,158 +26,72 @@ namespace STEMotion.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<ResponseDTO<SubjectResponseDTO>> CreateSubject(SubjectRequestDTO requestDTO)
+        public async Task<SubjectResponseDTO> CreateSubject(SubjectRequestDTO requestDTO)
         {
-            try
+            var grade = await _unitOfWork.GradeRepository
+                                         .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel)
+                                         .FirstOrDefaultAsync();
+            if (grade == null)
             {
-                var grade = await _unitOfWork.GradeRepository
-                                             .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel)
-                                             .FirstOrDefaultAsync();
-                if (grade == null)
-                {
-                    return new ResponseDTO<SubjectResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = $"Grade level {requestDTO.GradeLevel} not found.",
-                        Result = null
-                    };
-                }
+                throw new NotFoundException("Môn học", requestDTO.SubjectName);
+            }
 
-                var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
-                                      x.GradeId == grade.GradeId
-                                      && x.SubjectName.ToLower() == requestDTO.SubjectName.ToLower());
-                if (existing)
-                {
-                    return new ResponseDTO<SubjectResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = $"Subject '{requestDTO.SubjectName}' already exists in Grade {requestDTO.GradeLevel}.",
-                        Result = null
-                    };
-                }
-                var subject = _mapper.Map<Subject>(requestDTO);
-                subject.Status = "Active";
-                subject.GradeId = grade.GradeId;
-                var request = await _unitOfWork.SubjectRepository.CreateAsync(subject);
-                await _unitOfWork.SaveChangesAsync();
-                if (request == null)
-                {
-                    return new ResponseDTO<SubjectResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = "Created Subject fail",
-                        Result = null
-                    };
-                }
-                var response = _mapper.Map<SubjectResponseDTO>(request);
-                response.GradeLevel = grade.GradeLevel;
-                return new ResponseDTO<SubjectResponseDTO>
-                {
-                    IsSuccess = true,
-                    Message = "Create Subject successfull",
-                    Result = response
-                };
-            }
-            catch (Exception ex)
+            var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
+                                  x.GradeId == grade.GradeId
+                                  && x.SubjectName.ToLower() == requestDTO.SubjectName.ToLower());
+            if (existing)
             {
-                return new ResponseDTO<SubjectResponseDTO>
-                {
-                    IsSuccess = false,
-                    Message = $"Error creating subject: {ex.Message}",
-                    Result = null
-                };
+                throw new AlreadyExistsException($"{requestDTO.SubjectName}", $"{requestDTO.GradeLevel}");
             }
+            var subject = _mapper.Map<Subject>(requestDTO);
+            subject.Status = "Active";
+            subject.GradeId = grade.GradeId;
+            var request = await _unitOfWork.SubjectRepository.CreateAsync(subject);
+            await _unitOfWork.SaveChangesAsync();
+            if (request == null)
+            {
+                throw new InternalServerException("Không thể tạo môn học");
+            }
+            var response = _mapper.Map<SubjectResponseDTO>(request);
+            response.GradeLevel = grade.GradeLevel;
+            return response;
         }
-        public async Task<ResponseDTO<bool>> DeleteSubject(Guid id)
+        public async Task<bool> DeleteSubject(Guid id)
         {
-            try
+            var subject = await _unitOfWork.SubjectRepository.GetByIdAsync(id);
+            if (subject == null)
             {
-                var subject = await _unitOfWork.SubjectRepository.GetByIdAsync(id);
-                if (subject == null)
-                {
-                    return new ResponseDTO<bool>
-                    {
-                        IsSuccess = false,
-                        Message = "Not Found",
-                        Result = false
-                    };
-                }
-                _unitOfWork.SubjectRepository.Delete(subject);
-                await _unitOfWork.SaveChangesAsync();
-                return new ResponseDTO<bool>
-                {
-                    IsSuccess = true,
-                    Message = "Subject deleted Successful",
-                    Result = true
-                };
+                throw new NotFoundException("Môn học này không tồn tại");
             }
-            catch (Exception ex)
-            {
-                return new ResponseDTO<bool>
-                {
-                    IsSuccess = false,
-                    Message = $"Error: {ex.Message}",
-                    Result = false
-                };
-            }
+            _unitOfWork.SubjectRepository.Delete(subject);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<IEnumerable<ResponseDTO<SubjectResponseDTO>>> GetAllSubject()
+        public async Task<IEnumerable<SubjectResponseDTO>> GetAllSubject()
         {
             var subject = await _unitOfWork.SubjectRepository.FindAllAsync(x => x.Grade);
             var response = _mapper.Map<IEnumerable<SubjectResponseDTO>>(subject);
-            return response.Select(subject => new ResponseDTO<SubjectResponseDTO>
-            {
-                IsSuccess = true,
-                Message = "Subject created sucessfully",
-                Result = subject
-            });
+            return response;
         }
 
-        public async Task<ResponseDTO<SubjectResponseDTO>> GetSubjectById(Guid id)
+        public async Task<SubjectResponseDTO> GetSubjectById(Guid id)
         {
-            try
+            var result = await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id, false, x => x.Grade).FirstOrDefaultAsync();
+            if (result == null)
             {
-                var result =  await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id,false, x => x.Grade).FirstOrDefaultAsync();
-                if (result == null)
-                {
-                    return new ResponseDTO<SubjectResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = "Not found",
-                        Result = null
-                    };
-                }
-                var response = _mapper.Map<SubjectResponseDTO>(result);
-                return new ResponseDTO<SubjectResponseDTO>
-                {
-                    IsSuccess = true,
-                    Message = "Created Subject successfull",
-                    Result = response
-                };
+                throw new NotFoundException("Môn học này không tồn tại");
             }
-            catch (Exception ex)
-            {
-                return new ResponseDTO<SubjectResponseDTO>
-                {
-                    IsSuccess = false,
-                    Message = $"Error: {ex.Message}"
-                };
-            }
+            var response = _mapper.Map<SubjectResponseDTO>(result);
+            return response;
         }
 
-        public async Task<ResponseDTO<SubjectResponseDTO>> UpdateSubject(Guid id, UpdateSubjectRequestDTO requestDTO)
+        public async Task<SubjectResponseDTO> UpdateSubject(Guid id, UpdateSubjectRequestDTO requestDTO)
         {
-            try
-            {
                 var subject = await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id, false, s => s.Grade).FirstOrDefaultAsync();
                 if (subject == null)
                 {
-                    return new ResponseDTO<SubjectResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = "Subject not found"
-                    };
+                    throw new NotFoundException("Môn học này không tồn tại");
                 }
                 if (subject.Grade.GradeLevel != requestDTO.GradeLevel)
                 {
@@ -186,12 +101,7 @@ namespace STEMotion.Application.Services
 
                     if (newGrade == null)
                     {
-                        return new ResponseDTO<SubjectResponseDTO>
-                        {
-                            IsSuccess = false,
-                            Message = $"Grade level {requestDTO.GradeLevel} not found.",
-                            Result = null
-                        };
+                       throw new NotFoundException("Lớp", requestDTO.GradeLevel);
                     }
 
                     subject.GradeId = newGrade.GradeId;
@@ -206,33 +116,14 @@ namespace STEMotion.Application.Services
 
                     if (existing)
                     {
-                        return new ResponseDTO<SubjectResponseDTO>
-                        {
-                            IsSuccess = false,
-                            Message = $"Subject '{requestDTO.SubjectName}' already exists in Grade {requestDTO.GradeLevel}.",
-                            Result = null
-                        };
+                        throw new AlreadyExistsException($"{requestDTO.SubjectName}", $"{requestDTO.GradeLevel}");
                     }
                 }
                 _mapper.Map(requestDTO, subject);
                 _unitOfWork.SubjectRepository.Update(subject);
                 await _unitOfWork.SaveChangesAsync();
                 var response = _mapper.Map<SubjectResponseDTO>(subject);
-                return new ResponseDTO<SubjectResponseDTO>
-                {
-                    IsSuccess = true,
-                    Message = "Update succesfull",
-                    Result = response
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseDTO<SubjectResponseDTO>
-                {
-                    IsSuccess = false,
-                    Message = $"Error: {ex.Message}"
-                };
-            }
+                return response;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
+using STEMotion.Application.Exceptions;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Domain.Entities;
@@ -23,198 +24,98 @@ namespace STEMotion.Application.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<IEnumerable<ResponseDTO<ChapterResponseDTO>>> GetAllChapter()
+        public async Task<IEnumerable<ChapterResponseDTO>> GetAllChapter()
         {
             var chapters = await _unitOfWork.ChapterRepository.FindAllAsync(x => x.Subject);
             var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapters);
-            return response.Select(chapter => new ResponseDTO<ChapterResponseDTO>
-            {
-                IsSuccess = true,
-                Message = "Get All Successfully",
-                Result = chapter
-            });
+            return response;
         }
 
-        public async Task<ResponseDTO<ChapterResponseDTO>> CreateChapter(ChapterRequestDTO requestDTO)
+        public async Task<ChapterResponseDTO> CreateChapter(ChapterRequestDTO requestDTO)
         {
-            try
+            var grade = await _unitOfWork.GradeRepository
+                            .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel).FirstOrDefaultAsync();
+            if (grade == null)
             {
-                var grade = await _unitOfWork.GradeRepository
-                                .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel).FirstOrDefaultAsync();
-                if (grade == null)
-                {
-                    return new ResponseDTO<ChapterResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = $"Không tìm thấy Khối lớp {requestDTO.GradeLevel}.",
-                        Result = null
-                    };
-                }
-                var subject = await _unitOfWork.SubjectRepository
-                    .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
-                                         && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
+                throw new NotFoundException("Lớp", requestDTO.GradeLevel);
+            }
+            var subject = await _unitOfWork.SubjectRepository
+                .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
+                                     && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
 
-                if (subject == null)
-                {
-                    return new ResponseDTO<ChapterResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = $"Môn học '{requestDTO.SubjectName}' không tồn tại trong Khối lớp {requestDTO.GradeLevel}.",
-                        Result = null
-                    };
-                }
-                var existingChapter = await _unitOfWork.ChapterRepository.ExistsAsync(x => x.ChapterName.ToLower().Equals(requestDTO.ChapterName.ToLower()));
-                if (existingChapter)
-                {
-                    return new ResponseDTO<ChapterResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = "Chapter already exists.",
-                        Result = null
-                    };
-                }
-                var chapter = _mapper.Map<Chapter>(requestDTO);
-                chapter.Status = "Active";
-                chapter.SubjectId = subject.SubjectId;
-                var request = await _unitOfWork.ChapterRepository.CreateAsync(chapter);
-                await _unitOfWork.SaveChangesAsync();
-                if (request == null)
-                {
-                    return new ResponseDTO<ChapterResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = "Chapter created fail",
-                        Result = null
-                    };
-                }
-                var response = _mapper.Map<ChapterResponseDTO>(request);
-                return new ResponseDTO<ChapterResponseDTO>
-                {
-                    IsSuccess = true,
-                    Message = "Chapter created successfully",
-                    Result = response
-                };
-            }
-            catch (Exception ex)
+            if (subject == null)
             {
-                return new ResponseDTO<ChapterResponseDTO>
-                {
-                    IsSuccess = false,
-                    Message = $"Error creating chapter: {ex.Message}",
-                    Result = null
-                };
+                throw new NotFoundException($"{requestDTO.SubjectName}", requestDTO.GradeLevel);
             }
+            var existingChapter = await _unitOfWork.ChapterRepository.ExistsAsync(x => x.ChapterName.ToLower().Equals(requestDTO.ChapterName.ToLower()));
+            if (existingChapter)
+            {
+                throw new AlreadyExistsException("Chương", $"{requestDTO.ChapterName}");
+            }
+            var chapter = _mapper.Map<Chapter>(requestDTO);
+            chapter.Status = "Active";
+            chapter.SubjectId = subject.SubjectId;
+            var request = await _unitOfWork.ChapterRepository.CreateAsync(chapter);
+            await _unitOfWork.SaveChangesAsync();
+            if (request == null)
+            {
+                throw new InternalServerException("Không thể tạo chương");
+            }
+            var response = _mapper.Map<ChapterResponseDTO>(request);
+            return response;
+
         }
-        public async Task<ResponseDTO<ChapterResponseDTO>> GetChapterById(Guid id)
+        public async Task<ChapterResponseDTO> GetChapterById(Guid id)
         {
-            try
+            var chapter = await _unitOfWork.ChapterRepository.FindByCondition(x => x.ChapterId == id, false, x => x.Subject).FirstOrDefaultAsync();
+            if (chapter == null)
             {
+                throw new NotFoundException("Chương không tồn tại");
+            }
+            var response = _mapper.Map<ChapterResponseDTO>(chapter);
+            return response;
+        }
+        public async Task<ChapterResponseDTO> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO)
+        {
                 var chapter = await _unitOfWork.ChapterRepository.FindByCondition(x => x.ChapterId == id, false, x => x.Subject).FirstOrDefaultAsync();
                 if (chapter == null)
                 {
-                    return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Not found" };
-                }
-                var response = _mapper.Map<ChapterResponseDTO>(chapter);
-                return new ResponseDTO<ChapterResponseDTO>
-                {
-                    IsSuccess = true,
-                    Message = "Get By Id Succesfully",
-                    Result = response
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseDTO<ChapterResponseDTO>
-                {
-                    IsSuccess = false,
-                    Message = $"Error: {ex.Message}"
-                };
-            }
-        }
-        public async Task<ResponseDTO<ChapterResponseDTO>> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO)
-        {
-            try
-            {
-                var chapter = await _unitOfWork.ChapterRepository.FindByCondition(x => x.ChapterId == id, false, x => x.Subject).FirstOrDefaultAsync();
-                if (chapter == null)
-                {
-                    return new ResponseDTO<ChapterResponseDTO>
-                    {
-                        IsSuccess = false,
-                        Message = "Chapter not found"
-                    };
+                    throw new NotFoundException($"Chương {requestDTO.ChapterName} không tồn tại");
                 }
                 var grade = await _unitOfWork.GradeRepository
                   .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel).FirstOrDefaultAsync();
 
                 if (grade == null)
-                    return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Grade level not found" };
-
+                    throw new NotFoundException("Lớp", requestDTO.GradeLevel);
                 var subject = await _unitOfWork.SubjectRepository
                    .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
                                     && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
 
                 if (subject == null)
-                    return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Subject not found in this Grade" };
+                    throw new NotFoundException($"Môn học {requestDTO.SubjectName} không tồn tại trong lớp {grade.GradeLevel}");
 
                 var isDuplicate = await _unitOfWork.ChapterRepository
                   .ExistsAsync(x => x.ChapterName.ToLower() == requestDTO.ChapterName.ToLower() && x.ChapterId != id);
 
                 if (isDuplicate)
-                    return new ResponseDTO<ChapterResponseDTO> { IsSuccess = false, Message = "Chapter title already exists" };
+                    throw new AlreadyExistsException("Chương", $"{requestDTO.ChapterName}");
 
                 _mapper.Map(requestDTO, chapter);
                 _unitOfWork.ChapterRepository.Update(chapter);
                 await _unitOfWork.SaveChangesAsync();
                 var response = _mapper.Map<ChapterResponseDTO>(chapter);
-                return new ResponseDTO<ChapterResponseDTO>
-                {
-                    IsSuccess = true,
-                    Message = "Grade update successfully",
-                    Result = response
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseDTO<ChapterResponseDTO>
-                {
-                    IsSuccess = false,
-                    Message = $"Error: {ex.Message}"
-                };
-            }
+                return response;
         }
-        public async Task<ResponseDTO<bool>> DeleteChapter(Guid id)
+        public async Task<bool> DeleteChapter(Guid id)
         {
-            try
-            {
                 var findingChapter = await _unitOfWork.ChapterRepository.GetByIdAsync(id);
                 if (findingChapter == null)
                 {
-                    return new ResponseDTO<bool>
-                    {
-                        IsSuccess = false,
-                        Message = "Chapter not found",
-                        Result = false
-                    };
+                    throw new NotFoundException($"Chương này không tồn tại");
                 }
                 _unitOfWork.ChapterRepository.Delete(findingChapter);
                 await _unitOfWork.SaveChangesAsync();
-                return new ResponseDTO<bool>
-                {
-                    IsSuccess = true,
-                    Message = "Grade deleted successfully",
-                    Result = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseDTO<bool>
-                {
-                    IsSuccess = false,
-                    Message = $"Error: {ex.Message}",
-                    Result = false
-                };
-            }
+                return true;
         }
     }
 }

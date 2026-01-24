@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
+using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,16 +22,16 @@ namespace STEMotion.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSubject()
         {
-            var subjects = await _subjectService.GetAllSubject();
-            return Ok(subjects);
+            var result = await _subjectService.GetAllSubject();
+            return Ok(ResponseDTO<IEnumerable<SubjectResponseDTO>>.Success(result, "Lấy danh sách môn học thành công"));
         }
 
         [EndpointDescription("API này lấy Subject theo Id")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubjectByIdAsync(Guid id)
         {
-            var subject = await _subjectService.GetSubjectById(id);
-            return Ok(subject);
+            var result = await _subjectService.GetSubjectById(id);
+            return Ok(ResponseDTO<SubjectResponseDTO>.Success(result, "Tìm thấy thông tin môn học"));
         }
 
         [EndpointDescription("API này để tạo Subject")]
@@ -38,7 +39,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> CreateSubject([FromBody] SubjectRequestDTO createSubjectRequest)
         {
             var result = await _subjectService.CreateSubject(createSubjectRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<SubjectResponseDTO>.Success(result, "Tạo môn học thành công"));
         }
 
         [EndpointDescription("API này để sửa Subject theo Id")]
@@ -46,7 +47,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> UpdateSubject(Guid id, [FromBody] UpdateSubjectRequestDTO updateSubjectRequest)
         {
             var result = await _subjectService.UpdateSubject(id, updateSubjectRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<SubjectResponseDTO>.Success(result, "Cập nhật môn học thành công"));
         }
 
         [EndpointDescription("API này để xóa Subject theo Id")]
@@ -54,7 +55,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> DeleteSubject(Guid id)
         {
             var result = await _subjectService.DeleteSubject(id);
-            return Ok(result);
+            return Ok(ResponseDTO<bool>.Success(result, "Xóa môn học thành công"));
         }
     }
 }
