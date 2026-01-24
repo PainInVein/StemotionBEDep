@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Application.Middleware;
@@ -8,6 +12,7 @@ using STEMotion.Application.Services;
 using STEMotion.Domain.Entities;
 using STEMotion.Infrastructure.DBContext;
 using STEMotion.Infrastructure.Repositories;
+using STEMotion.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,8 +44,53 @@ namespace STEMotion.Infrastructure.Configuration
             services.AddScoped<ILessonService, LessonService>();
             services.AddScoped<ISubjectRepository, SubjectRepository>();
             services.AddScoped<ISubjectService, SubjectService>();
-            return services;
+            services.AddScoped(typeof(IEmailService), typeof(SmtpEmailService));
+            services.AddScoped<IOtpService, OtpService>();
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 
+                opt.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(opt =>
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                };
+            })
+            .AddCookie()
+            .AddGoogle(opt =>
+            {
+                opt.ClientId = configuration["Authentication:Google:ClientId"];
+                opt.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+            });
+
+            // Email
+            var emailSettings = configuration.GetSection(nameof(SmtpEmailSettings)).Get<SmtpEmailSettings>();
+            services.AddSingleton(emailSettings);
+
+            return services;
+        }
+
+        public static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
+        {
+            var redisConnectionString = configuration.GetSection("CacheSettings:ConnectionString").Value;
+            if (string.IsNullOrEmpty(redisConnectionString))
+            {
+                throw new ArgumentNullException("Redis Connection string is not configured");
+            }
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+            });
         }
     }
 }

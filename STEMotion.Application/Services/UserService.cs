@@ -3,12 +3,13 @@ using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
+using STEMotion.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using STEMotion.Domain.Entities;
 
 namespace STEMotion.Application.Services
 {
@@ -18,17 +19,74 @@ namespace STEMotion.Application.Services
         private readonly IMapper _mapper;
         private readonly IPasswordService _passwordService;
         private readonly IJWTService _jwtService;
-        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IMapper mapper, IPasswordService passwordService, IJWTService jWTService)
+        private readonly IOtpService _otpService;
+        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IMapper mapper, IPasswordService passwordService, IJWTService jWTService, IOtpService otpService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _passwordService = passwordService;
             _jwtService = jWTService;
+            _otpService = otpService;
         }
 
-        public Task<ResponseDTO<bool>> ChangePassword(Guid userId, ChangePasswordRequestDTO changePasswordRequest)
+        public async Task<ResponseDTO<string>> AuthenticateGoogleUserAsync(GoogleRequestDTO googleRequestDTO)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == googleRequestDTO.Email, u => u.Role);
+                if (user == null)
+                {
+                    var roleName = googleRequestDTO.RoleName?.ToLower() ?? "student";
+                    var role = await _unitOfWork.RoleRepository.FirstOrDefaultAsync(r => r.Name.ToLower() == roleName);
+                    if (role == null)
+                    {
+                        return new ResponseDTO<string>("Invalid role", false, null);
+                    }
+                    var newUser = _mapper.Map<User>(googleRequestDTO);
+                    newUser.RoleId = role.Id;
+                    newUser.Password = _passwordService.HashPasswords(Guid.NewGuid().ToString());
+
+                    await _unitOfWork.UserRepository.CreateAsync(newUser);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == newUser.Email, u => u.Role);
+                }
+                var token = _jwtService.GenerateToken(user.Email, user.Role.Name);
+                return new ResponseDTO<string>("Login successful", true, token);
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<string>($"Error: {ex.Message}", false, null);
+            }
+        }
+
+        public async Task<ResponseDTO<bool>> ChangePassword(Guid userId, ChangePasswordRequestDTO request)
+        {
+            try
+            {
+                var (isOtpValid, _) = await _otpService.VerifyOtpAsync(request.Email, request.OtpCode);
+                if (!isOtpValid)
+                {
+                    return new ResponseDTO<bool>("Mã OTP không chính xác hoặc đã hết hạn!", false, false);
+                }
+
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return new ResponseDTO<bool>("Không tìm thấy người dùng này.", false, false);
+                }
+
+                user.Password = _passwordService.HashPasswords(request.NewPassword);
+
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                return new ResponseDTO<bool>("Đổi mật khẩu thành công rồi nhé!", true, true);
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<bool>($"Lỗi khi đổi mật khẩu: {ex.Message}", false, false);
+            }
         }
 
         public async Task<ResponseDTO<UserResponseDTO>> CreateUser(CreateUserRequestDTO user)
@@ -222,6 +280,51 @@ namespace STEMotion.Application.Services
             }
         }
 
+        public async Task<ResponseDTO<string>> RequestPasswordResetOtpAsync(string email)
+        {
+            try
+            {
+                var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == email);
+                if (user == null)
+                {
+                    return new ResponseDTO<string>("Email này chưa có trong hệ thống.", false, null);
+                }
+
+                await _otpService.SendOtpAsync(email, (user.FirstName + " " + user.LastName));
+                return new ResponseDTO<string>("Mã đổi mật khẩu đã gửi vào mail.", true, null);
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<string>($"Error: {ex.Message}", false, null);
+            }
+        }
+
+        public async Task<ResponseDTO<string>> RequestRegistrationOtpAsync(CreateUserRequestDTO createUserRequest)
+        {
+            try
+            {
+                var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == createUserRequest.Email);
+                if (user != null)
+                {
+                    return new ResponseDTO<string>("Email đã được đăng ký rồi !", false, null);
+                }
+
+                var role = await _unitOfWork.RoleRepository.FirstOrDefaultAsync(r => r.Name.ToLower() == createUserRequest.RoleName.ToLower());
+                if (role == null)
+                {
+                    return new ResponseDTO<string>("Role không hợp lệ!", false, null);
+                }
+
+                await _otpService.SendOtpAsync(createUserRequest.Email, null, createUserRequest);
+
+                return new ResponseDTO<string>("Mã xác thực đã được gửi vào mail.", true, null);
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<string>($"Lỗi hệ thống: {ex.Message}", false, null);
+            }
+        }
+
         public async Task<ResponseDTO<UserResponseDTO>> UpdateUser(Guid id, UpdateUserRequestDTO userDTO)
         {
             try
@@ -258,5 +361,25 @@ namespace STEMotion.Application.Services
                 };
             }
         }
+        public async Task<ResponseDTO<UserResponseDTO>> VerifyOtpAndRegisterAsync(string email, string otpCode)
+        {
+            try
+            {
+                var (isValid, registrationJson) = await _otpService.VerifyOtpAsync(email, otpCode);
+                if (!isValid || string.IsNullOrEmpty(registrationJson))
+                    return new ResponseDTO<UserResponseDTO>("Mã OTP không chính xác hoặc đã hết hạn!", false, null);
+
+                var request = JsonSerializer.Deserialize<CreateUserRequestDTO>(registrationJson);
+                if (request is null)
+                    return new ResponseDTO<UserResponseDTO>("Dữ liệu không hợp lệ!", false, null);
+
+                return await CreateUser(request);
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<UserResponseDTO>($"Lỗi: {ex.Message}", false, null);
+            }
+        }
     }
 }
+
