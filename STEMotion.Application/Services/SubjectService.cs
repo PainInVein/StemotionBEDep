@@ -19,18 +19,16 @@ namespace STEMotion.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
+        #region cto
         public SubjectService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-
+        #endregion cto
         public async Task<SubjectResponseDTO> CreateSubject(SubjectRequestDTO requestDTO)
         {
-            var grade = await _unitOfWork.GradeRepository
-                                         .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel)
-                                         .FirstOrDefaultAsync();
+            var grade = await _unitOfWork.GradeRepository.GetGradeByLevelAsync(requestDTO.GradeLevel);
             if (grade == null)
             {
                 throw new NotFoundException("Môn học", requestDTO.SubjectName);
@@ -77,7 +75,7 @@ namespace STEMotion.Application.Services
 
         public async Task<SubjectResponseDTO> GetSubjectById(Guid id)
         {
-            var result = await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id, false, x => x.Grade).FirstOrDefaultAsync();
+            var result = await _unitOfWork.SubjectRepository.GetSubjectByIdWithGradeAsync(id);
             if (result == null)
             {
                 throw new NotFoundException("Môn học này không tồn tại");
@@ -88,17 +86,14 @@ namespace STEMotion.Application.Services
 
         public async Task<SubjectResponseDTO> UpdateSubject(Guid id, UpdateSubjectRequestDTO requestDTO)
         {
-                var subject = await _unitOfWork.SubjectRepository.FindByCondition(x => x.SubjectId == id, false, s => s.Grade).FirstOrDefaultAsync();
+                var subject = await _unitOfWork.SubjectRepository.GetSubjectByIdWithGradeAsync(id);
                 if (subject == null)
                 {
                     throw new NotFoundException("Môn học này không tồn tại");
                 }
                 if (subject.Grade.GradeLevel != requestDTO.GradeLevel)
                 {
-                    var newGrade = await _unitOfWork.GradeRepository
-                        .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel)
-                        .FirstOrDefaultAsync();
-
+                var newGrade = await _unitOfWork.GradeRepository.GetGradeByLevelAsync(requestDTO.GradeLevel);
                     if (newGrade == null)
                     {
                        throw new NotFoundException("Lớp", requestDTO.GradeLevel);

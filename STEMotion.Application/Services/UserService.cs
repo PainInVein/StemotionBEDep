@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Exceptions;
@@ -21,6 +22,7 @@ namespace STEMotion.Application.Services
         private readonly IPasswordService _passwordService;
         private readonly IJWTService _jwtService;
         private readonly IOtpService _otpService;
+        #region cto
         public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IMapper mapper, IPasswordService passwordService, IJWTService jWTService, IOtpService otpService)
         {
             _unitOfWork = unitOfWork;
@@ -29,14 +31,14 @@ namespace STEMotion.Application.Services
             _jwtService = jWTService;
             _otpService = otpService;
         }
-
+        #endregion cto
         public async Task<string> AuthenticateGoogleUserAsync(GoogleRequestDTO googleRequestDTO)
         {
-            var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == googleRequestDTO.Email, u => u.Role);
+            var user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(googleRequestDTO.Email, false);
             if (user == null)
             {
                 var roleName = googleRequestDTO.RoleName?.ToLower() ?? "student";
-                var role = await _unitOfWork.RoleRepository.FirstOrDefaultAsync(r => r.Name.ToLower() == roleName);
+                var role = await _unitOfWork.RoleRepository.GetRoleByNameAsync(roleName);
                 if (role == null)
                 {
                     throw new NotFoundException("Role", roleName);
@@ -48,7 +50,7 @@ namespace STEMotion.Application.Services
                 await _unitOfWork.UserRepository.CreateAsync(newUser);
                 await _unitOfWork.SaveChangesAsync();
 
-                user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == newUser.Email, u => u.Role);
+                user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(newUser.Email, false);
             }
             var token = _jwtService.GenerateToken(user.Email, user.Role.Name);
             return token;
@@ -61,7 +63,7 @@ namespace STEMotion.Application.Services
             {
                 throw new BadRequestException("Mã OTP không chính xác hoặc đã hết hạn!");
             }
-            var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(request.Email, true);
             if (user == null)
             {
                 throw new NotFoundException("User", request.Email);
@@ -74,14 +76,12 @@ namespace STEMotion.Application.Services
 
         public async Task<UserResponseDTO> CreateUser(CreateUserRequestDTO user)
         {
-            var existingUser = await _unitOfWork.UserRepository
-            .FirstOrDefaultAsync(u => u.Email == user.Email);
+            var existingUser = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(user.Email, false);
             if (existingUser != null)
             {
                 throw new AlreadyExistsException("User", user.Email);
             }
-            var role = await _unitOfWork.RoleRepository.FirstOrDefaultAsync(r =>
-                                    r.Name.ToLower() == user.RoleName.ToLower());
+            var role = await _unitOfWork.RoleRepository.GetRoleByNameAsync(user.RoleName);
             if (role == null)
             {
                 throw new NotFoundException("Role", user.RoleName);
@@ -95,8 +95,6 @@ namespace STEMotion.Application.Services
 
             var response = _mapper.Map<UserResponseDTO>(newUser);
             response.RoleName = role.Name;
-
-
             return response;
         }
 
@@ -137,8 +135,7 @@ namespace STEMotion.Application.Services
 
         public async Task<string> LoginUser(LoginRequestDTO loginRequest)
         {
-            var user = await _unitOfWork.UserRepository
-                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email, u => u.Role);
+            var user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(loginRequest.Email, false);
 
             if (user == null)
             {
@@ -164,7 +161,7 @@ namespace STEMotion.Application.Services
         public async Task RequestPasswordResetOtpAsync(string email)
         {
 
-            var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(email, false);
             if (user == null)
             {
                 throw new NotFoundException("User", email);
@@ -175,13 +172,13 @@ namespace STEMotion.Application.Services
 
         public async Task RequestRegistrationOtpAsync(CreateUserRequestDTO createUserRequest)
         {
-            var user = await _unitOfWork.UserRepository.FirstOrDefaultAsync(u => u.Email == createUserRequest.Email);
+            var user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(createUserRequest.Email, false);
             if (user != null)
             {
                 throw new AlreadyExistsException("User", createUserRequest.Email);
             }
 
-            var role = await _unitOfWork.RoleRepository.FirstOrDefaultAsync(r => r.Name.ToLower() == createUserRequest.RoleName.ToLower());
+            var role = await _unitOfWork.RoleRepository.GetRoleByNameAsync(createUserRequest.RoleName);
             if (role == null)
             {
                 throw new NotFoundException("Role", createUserRequest.RoleName);

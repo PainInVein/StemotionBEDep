@@ -81,14 +81,6 @@ namespace STEMotion.Infrastructure.Repositories
         /// <returns></returns>
 
         /// <summary>
-        /// Collects all entities that match the given predicate asynchronously. Predicate is a condition to filter entities.
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) => await _dbSet.Where(predicate).ToListAsync();
-
-
-        /// <summary>
         /// Find By Conditon (Ko can await/async)
         /// </summary>
         /// <param name="expression"></param>
@@ -96,44 +88,6 @@ namespace STEMotion.Infrastructure.Repositories
         /// <returns></returns>
         public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false) => !trackChanges ? _context.Set<T>().Where(expression).AsNoTracking()
         : _context.Set<T>().Where(expression);
-
-
-        /// <summary>
-        /// Find By Conditon co include (Ko can await/async)
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <param name="trackChanges"></param>
-        /// <param name="includeProperties"></param>
-        /// <returns></returns>
-        public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false, params Expression<Func<T, object>>[] includeProperties)
-        {
-            var item = FindByCondition(expression, trackChanges);
-            item = includeProperties.Aggregate(item, (current, includeProperty) => current.Include(includeProperty));
-            return item;
-        }
-
-
-        /// <summary>
-        /// Collects the first entity that matches the given predicate asynchronously. Predicate is a condition to filter entities. Predicate is a condition to filter entities.
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-
-        //public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate) => await _dbSet.FirstOrDefaultAsync(predicate);
-
-        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
-        {
-            IQueryable<T> query = _dbSet;
-            if (includes != null && includes.Any())
-            {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
-            return await query.FirstOrDefaultAsync(predicate);
-        }
-
 
         /// <summary>
         /// Gets all entities from the database asynchronously.
@@ -175,6 +129,31 @@ namespace STEMotion.Infrastructure.Repositories
         /// Updates an existing entity in the database.
         /// </summary>
         /// <param name="entity"></param>
-        public void Update(T entity) =>  _dbSet.Update(entity);
+        public void Update(T entity) => _dbSet.Update(entity);
+
+
+        public async Task<(IEnumerable<T> items, int totalCount)> GetPagedAsync(int pageNumber,int pageSize,Expression<Func<T, bool>>? filter = null,params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (includes != null && includes.Any())
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (items, totalCount);
+        }
     }
 }

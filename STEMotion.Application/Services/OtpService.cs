@@ -14,12 +14,14 @@ namespace STEMotion.Application.Services
     {
         private readonly IEmailService _emailService;
         private readonly IDistributedCache _cache;
-
+        #region cto
         public OtpService(IEmailService emailService, IDistributedCache cache)
         {
             _emailService = emailService;
             _cache = cache;
         }
+        #endregion cto
+        #region sendOTP
         public async Task SendOtpAsync(string email, string? userName = null, CreateUserRequestDTO? registrationData = null)
         {
             var otpCode = new Random().Next(100000, 999999).ToString();
@@ -64,8 +66,8 @@ namespace STEMotion.Application.Services
                 Body = htmlBody
             });
         }
-
-
+        #endregion sendOTP
+        #region VerifyOtpAsync
         public async Task<(bool IsValid, string? RegistrationData)> VerifyOtpAsync(string email, string otp)
         {
             var savedOtp = await _cache.GetStringAsync($"OTP:{email}");
@@ -83,5 +85,6 @@ namespace STEMotion.Application.Services
 
             return (true, registrationJson);
         }
+        #endregion VerifyOtpAsync
     }
 }

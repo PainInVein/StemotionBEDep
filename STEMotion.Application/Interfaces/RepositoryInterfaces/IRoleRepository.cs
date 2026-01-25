@@ -9,5 +9,6 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
 {
     public interface IRoleRepository : IGenericRepository<Role>
     {
+        Task<Role?> GetRoleByNameAsync(string roleName);
     }
 }

@@ -18,13 +18,14 @@ namespace STEMotion.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
+        #region cto
         public GradeService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-
+        #endregion cto
+        #region CRUD
         public async Task<GradeResponseDTO> CreateGrade(GradeRequestDTO requestDTO)
         {
             var existingGrade = await _unitOfWork.GradeRepository.ExistsAsync(x => x.GradeLevel == requestDTO.GradeLevel);
@@ -66,7 +67,7 @@ namespace STEMotion.Application.Services
 
         public async Task<GradeResponseDTO> GetGradeById(Guid id)
         {
-            var result = await _unitOfWork.GradeRepository.FindByCondition(x => x.GradeId == id).FirstOrDefaultAsync();
+            var result = await _unitOfWork.GradeRepository.GetByIdAsync(id);
             if (result == null)
             {
                 throw new NotFoundException("Lớp không tồn tại");
@@ -89,5 +90,6 @@ namespace STEMotion.Application.Services
             var response = _mapper.Map<GradeResponseDTO>(grade);
             return response;
         }
+        #endregion CRUD
     }
 }

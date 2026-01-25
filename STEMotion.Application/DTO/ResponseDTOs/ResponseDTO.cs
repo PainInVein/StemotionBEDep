@@ -14,6 +14,13 @@ namespace STEMotion.Application.DTO.ResponseDTOs
         public string? ErrorCode { get; set; }
         public object? Errors { get; set; }
 
+        public ResponseDTO() { }
+        public ResponseDTO(string message, bool isSuccess, T? result)
+        {
+            Message = message;
+            IsSuccess = isSuccess;
+            Result = result;
+        }
         public static ResponseDTO<T> Success(T result, string message = "Thành công")
         {
             return new ResponseDTO<T>

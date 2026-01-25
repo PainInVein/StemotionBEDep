@@ -9,5 +9,8 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
 {
     public interface ISubjectRepository : IGenericRepository<Subject>
     {
+        Task<Subject?> GetSubjectByNameAndGradeAsync(string subjectName, Guid gradeId);
+        Task<Subject?> GetSubjectByIdWithGradeAsync(Guid id);
+
     }
 }

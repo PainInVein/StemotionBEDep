@@ -75,7 +75,7 @@ namespace STEMotion.Application.Services
 
         public async Task<LessonResponseDTO> GetLessonById(Guid id)
         {
-            var result = await _unitOfWork.LessonRepository.FindByCondition(x => x.LessonId == id, false, x => x.Chapter).FirstOrDefaultAsync();
+            var result = await _unitOfWork.LessonRepository.FindByCondition(x => x.LessonId == id, false).Include(x => x.Chapter).FirstOrDefaultAsync();
             if (result == null)
             {
                 throw new NotFoundException("Bài học này không tồn tại");
