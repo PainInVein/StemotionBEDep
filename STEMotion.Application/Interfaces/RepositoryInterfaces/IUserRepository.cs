@@ -11,5 +11,7 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+        Task<User?> GetUserByEmailWithRoleAsync(string email, bool trackChanges);
+
     }
 }

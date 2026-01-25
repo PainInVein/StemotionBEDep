@@ -16,32 +16,32 @@ namespace STEMotion.Application.Services
 {
     public class ChapterService : IChapterService
     {
+        
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
-
+        #region cto
         public ChapterService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+        #endregion cto
+        #region CRUD
         public async Task<IEnumerable<ChapterResponseDTO>> GetAllChapter()
         {
-            var chapters = await _unitOfWork.ChapterRepository.FindAllAsync(x => x.Subject);
+            var chapters = await _unitOfWork.ChapterRepository.GetAllChapterAsync();
             var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapters);
             return response;
         }
 
         public async Task<ChapterResponseDTO> CreateChapter(ChapterRequestDTO requestDTO)
         {
-            var grade = await _unitOfWork.GradeRepository
-                            .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel).FirstOrDefaultAsync();
+            var grade = await _unitOfWork.GradeRepository.GetGradeByLevelAsync(requestDTO.GradeLevel);
             if (grade == null)
             {
                 throw new NotFoundException("Lớp", requestDTO.GradeLevel);
             }
-            var subject = await _unitOfWork.SubjectRepository
-                .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
-                                     && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
+            var subject = await _unitOfWork.SubjectRepository.GetSubjectByNameAndGradeAsync(requestDTO.SubjectName, grade.GradeId);
 
             if (subject == null)
             {
@@ -67,7 +67,7 @@ namespace STEMotion.Application.Services
         }
         public async Task<ChapterResponseDTO> GetChapterById(Guid id)
         {
-            var chapter = await _unitOfWork.ChapterRepository.FindByCondition(x => x.ChapterId == id, false, x => x.Subject).FirstOrDefaultAsync();
+            var chapter = await _unitOfWork.ChapterRepository.GetByIdAsync(id);
             if (chapter == null)
             {
                 throw new NotFoundException("Chương không tồn tại");
@@ -77,45 +77,42 @@ namespace STEMotion.Application.Services
         }
         public async Task<ChapterResponseDTO> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO)
         {
-                var chapter = await _unitOfWork.ChapterRepository.FindByCondition(x => x.ChapterId == id, false, x => x.Subject).FirstOrDefaultAsync();
-                if (chapter == null)
-                {
-                    throw new NotFoundException($"Chương {requestDTO.ChapterName} không tồn tại");
-                }
-                var grade = await _unitOfWork.GradeRepository
-                  .FindByCondition(g => g.GradeLevel == requestDTO.GradeLevel).FirstOrDefaultAsync();
+            var chapter = await _unitOfWork.ChapterRepository.GetByIdAsync(id);
+            if (chapter == null)
+            {
+                throw new NotFoundException($"Chương {requestDTO.ChapterName} không tồn tại");
+            }
+            var grade = await _unitOfWork.GradeRepository.GetGradeByLevelAsync(requestDTO.GradeLevel);
 
-                if (grade == null)
-                    throw new NotFoundException("Lớp", requestDTO.GradeLevel);
-                var subject = await _unitOfWork.SubjectRepository
-                   .FindByCondition(s => s.SubjectName.ToLower() == requestDTO.SubjectName.ToLower()
-                                    && s.GradeId == grade.GradeId).FirstOrDefaultAsync();
+            if (grade == null)
+                throw new NotFoundException("Lớp", requestDTO.GradeLevel);
+            var subject = await _unitOfWork.SubjectRepository.GetSubjectByNameAndGradeAsync(requestDTO.SubjectName, grade.GradeId);
+            if (subject == null)
+                throw new NotFoundException($"Môn học {requestDTO.SubjectName} không tồn tại trong lớp {grade.GradeLevel}");
 
-                if (subject == null)
-                    throw new NotFoundException($"Môn học {requestDTO.SubjectName} không tồn tại trong lớp {grade.GradeLevel}");
+            var isDuplicate = await _unitOfWork.ChapterRepository
+              .ExistsAsync(x => x.ChapterName.ToLower() == requestDTO.ChapterName.ToLower() && x.ChapterId != id);
 
-                var isDuplicate = await _unitOfWork.ChapterRepository
-                  .ExistsAsync(x => x.ChapterName.ToLower() == requestDTO.ChapterName.ToLower() && x.ChapterId != id);
+            if (isDuplicate)
+                throw new AlreadyExistsException("Chương", $"{requestDTO.ChapterName}");
 
-                if (isDuplicate)
-                    throw new AlreadyExistsException("Chương", $"{requestDTO.ChapterName}");
-
-                _mapper.Map(requestDTO, chapter);
-                _unitOfWork.ChapterRepository.Update(chapter);
-                await _unitOfWork.SaveChangesAsync();
-                var response = _mapper.Map<ChapterResponseDTO>(chapter);
-                return response;
+            _mapper.Map(requestDTO, chapter);
+            _unitOfWork.ChapterRepository.Update(chapter);
+            await _unitOfWork.SaveChangesAsync();
+            var response = _mapper.Map<ChapterResponseDTO>(chapter);
+            return response;
         }
         public async Task<bool> DeleteChapter(Guid id)
         {
-                var findingChapter = await _unitOfWork.ChapterRepository.GetByIdAsync(id);
-                if (findingChapter == null)
-                {
-                    throw new NotFoundException($"Chương này không tồn tại");
-                }
-                _unitOfWork.ChapterRepository.Delete(findingChapter);
-                await _unitOfWork.SaveChangesAsync();
-                return true;
+            var findingChapter = await _unitOfWork.ChapterRepository.GetByIdAsync(id);
+            if (findingChapter == null)
+            {
+                throw new NotFoundException($"Chương này không tồn tại");
+            }
+            _unitOfWork.ChapterRepository.Delete(findingChapter);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
+        #endregion CRUD
     }
 }

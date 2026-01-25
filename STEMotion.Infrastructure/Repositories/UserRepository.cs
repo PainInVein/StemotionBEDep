@@ -17,6 +17,13 @@ namespace STEMotion.Infrastructure.Repositories
         public UserRepository(StemotionContext context) : base(context)
         {
         }
+
+        public async Task<User?> GetUserByEmailWithRoleAsync(string email, bool trackChanges)
+        {
+            return await FindByCondition(u => u.Email == email, trackChanges)
+                            .Include(u => u.Role)
+                            .FirstOrDefaultAsync();
+        }
     }
 }
 

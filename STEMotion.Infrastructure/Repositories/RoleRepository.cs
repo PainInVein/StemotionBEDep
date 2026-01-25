@@ -1,4 +1,5 @@
-﻿using STEMotion.Application.Interfaces.RepositoryInterfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Domain.Entities;
 using STEMotion.Infrastructure.DBContext;
 using System;
@@ -13,6 +14,12 @@ namespace STEMotion.Infrastructure.Repositories
     {
         public RoleRepository(StemotionContext context) : base(context)
         {
+        }
+
+        public async Task<Role?> GetRoleByNameAsync(string roleName)
+        {
+            return await FindByCondition(r => r.Name.ToLower() == roleName.ToLower())
+                                     .FirstOrDefaultAsync();
         }
     }
 }

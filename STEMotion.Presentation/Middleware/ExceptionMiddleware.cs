@@ -20,27 +20,22 @@ namespace STEMotion.Presentation.Middleware
             }
             catch (BaseException ex)
             {
-                context.Response.StatusCode = ex.StatusCode;
-                context.Response.ContentType = "application/json";
-
-                var response = ResponseDTO<object>.Fail(
-                    ex.Message,
-                    ex.ErrorCode
-                );
-
-                await context.Response.WriteAsJsonAsync(response);
+                await HandleExceptionAsync(context, ex.StatusCode, ex.Message, ex.ErrorCode);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                context.Response.StatusCode = 500;
-
-                var response = ResponseDTO<object>.Fail(
-                    "Lỗi hệ thống",
-                    "INTERNAL_SERVER_ERROR"
-                );
-
-                await context.Response.WriteAsJsonAsync(response);
+                await HandleExceptionAsync(context, 500, "Lỗi hệ thống", "INTERNAL_SERVER_ERROR");
             }
+        }
+
+        private static Task HandleExceptionAsync(HttpContext context, int statusCode, string message, string errorCode)
+        {
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/json";
+
+            var response = ResponseDTO<object>.Fail(message, errorCode);
+
+            return context.Response.WriteAsJsonAsync(response);
         }
     }
 }

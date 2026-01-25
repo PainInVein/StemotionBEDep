@@ -1,9 +1,12 @@
-﻿namespace STEMotion.Presentation.Extensions
+﻿using STEMotion.Presentation.Middleware;
+
+namespace STEMotion.Presentation.Extensions
 {
     public static class ApplicationExtensions
     {
         public static void UseInfrastructure(this WebApplication app)
         {
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseSwagger();
             app.UseSwaggerUI();
             /* 
