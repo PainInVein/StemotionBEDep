@@ -22,10 +22,10 @@ namespace STEMotion.Presentation.Controllers
         [EndpointDescription("API này sẽ lấy tất cả Grade trong db")]
         // GET: api/<GradeController>
         [HttpGet]
-        public async Task<IActionResult> GetAllGrade()
+        public async Task<IActionResult> GetAllGrade([FromQuery] PaginationRequestDTO requestDTO)
         {
-            var result = await _gradeService.GetAllGrade();
-            return Ok(ResponseDTO<IEnumerable<GradeResponseDTO>>.Success(result, "Lấy danh sách khối lớp thành công"));
+            var result = await _gradeService.GetAllGrade(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<GradeResponseDTO>>.Success(result, "Lấy danh sách khối lớp thành công"));
         }
 
         [EndpointDescription("API này lấy Grade theo Id")]

@@ -26,10 +26,10 @@ namespace STEMotion.Application.Controllers
         [EndpointDescription("API này lấy tất cả User trong db")]
         // GET: api/<UsersController>
         [HttpGet]
-        public async Task<IActionResult> GetAllUser()
+        public async Task<IActionResult> GetAllUser([FromQuery]PaginationRequestDTO requestDTO)
         {
-            var result = await _userService.GetAllUsers();
-            return Ok(ResponseDTO<IEnumerable<UserResponseDTO>>.Success(result, "Lấy danh sách người dùng thành công"));
+            var result = await _userService.GetAllUsers(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<UserResponseDTO>>.Success(result, "Lấy danh sách người dùng thành công"));
         }
 
         [EndpointDescription("API này lấy User theo Id")]

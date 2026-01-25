@@ -66,11 +66,17 @@ namespace STEMotion.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<SubjectResponseDTO>> GetAllSubject()
+        public async Task<PaginatedResponseDTO<SubjectResponseDTO>> GetAllSubject(PaginationRequestDTO requestDTO)
         {
-            var subject = await _unitOfWork.SubjectRepository.FindAllAsync(x => x.Grade);
+            var (subject, total) = await _unitOfWork.SubjectRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize);
             var response = _mapper.Map<IEnumerable<SubjectResponseDTO>>(subject);
-            return response;
+            return new PaginatedResponseDTO<SubjectResponseDTO> 
+            {
+                Items = response,
+                PageNumber = requestDTO.PageNumber,
+                PageSize = requestDTO.PageSize,
+                TotalCount = total
+            };
         }
 
         public async Task<SubjectResponseDTO> GetSubjectById(Guid id)

@@ -20,10 +20,10 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này sẽ lấy tất cả Subject trong db")]
         [HttpGet]
-        public async Task<IActionResult> GetAllSubject()
+        public async Task<IActionResult> GetAllSubject([FromQuery] PaginationRequestDTO requestDTO)
         {
-            var result = await _subjectService.GetAllSubject();
-            return Ok(ResponseDTO<IEnumerable<SubjectResponseDTO>>.Success(result, "Lấy danh sách môn học thành công"));
+            var result = await _subjectService.GetAllSubject(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<SubjectResponseDTO>>.Success(result, "Lấy danh sách môn học thành công"));
         }
 
         [EndpointDescription("API này lấy Subject theo Id")]

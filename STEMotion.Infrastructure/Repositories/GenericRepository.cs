@@ -130,29 +130,20 @@ namespace STEMotion.Infrastructure.Repositories
         /// </summary>
         /// <param name="entity"></param>
         public void Update(T entity) => _dbSet.Update(entity);
-
-
-        public async Task<(IEnumerable<T> items, int totalCount)> GetPagedAsync(int pageNumber,int pageSize,Expression<Func<T, bool>>? filter = null,params Expression<Func<T, object>>[] includes)
+        public async Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null)
         {
-            IQueryable<T> query = _dbSet;
+            IQueryable<T> query = _context.Set<T>();
 
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
+            if (predicate != null)
+                query = query.Where(predicate);
 
-            if (includes != null && includes.Any())
-            {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
-            var totalCount = await query.CountAsync();
+            int totalCount = await query.CountAsync();
+
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
             return (items, totalCount);
         }
     }

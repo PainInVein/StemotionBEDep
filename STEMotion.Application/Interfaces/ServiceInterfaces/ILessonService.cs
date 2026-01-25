@@ -10,7 +10,7 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface ILessonService
     {
-        Task<IEnumerable<LessonResponseDTO>> GetAllLesson();
+        Task<PaginatedResponseDTO<LessonResponseDTO>> GetAllLesson(PaginationRequestDTO requestDTO);
         Task<LessonResponseDTO> GetLessonById(Guid id);
         Task<LessonResponseDTO> CreateLesson(LessonRequestDTO requestDTO);
         Task<LessonResponseDTO> UpdateLesson(Guid id, UpdateLessonRequestDTO requestDTO);

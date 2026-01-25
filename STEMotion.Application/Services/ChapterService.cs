@@ -27,11 +27,17 @@ namespace STEMotion.Application.Services
         }
         #endregion cto
         #region CRUD
-        public async Task<IEnumerable<ChapterResponseDTO>> GetAllChapter()
+        public async Task<PaginatedResponseDTO<ChapterResponseDTO>> GetAllChapter(PaginationRequestDTO requestDTO)
         {
-            var chapters = await _unitOfWork.ChapterRepository.GetAllChapterAsync();
+            var (chapters, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber,requestDTO.PageSize);
             var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapters);
-            return response;
+            return new PaginatedResponseDTO<ChapterResponseDTO>
+            {
+                Items = response,
+                PageNumber = requestDTO.PageNumber,
+                PageSize = requestDTO.PageSize,
+                TotalCount = total
+            }; 
         }
 
         public async Task<ChapterResponseDTO> CreateChapter(ChapterRequestDTO requestDTO)
