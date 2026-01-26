@@ -1,4 +1,5 @@
-﻿using STEMotion.Application.Interfaces.RepositoryInterfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Domain.Entities;
 using STEMotion.Infrastructure.DBContext;
 using System;
@@ -13,6 +14,11 @@ namespace STEMotion.Infrastructure.Repositories
     {
         public ChapterRepository(StemotionContext context) : base(context)
         {
+        }
+
+        public async Task<IEnumerable<Chapter>> GetAllChapterAsync()
+        {
+            return await FindAll(false).Include(x => x.Subject).ToListAsync();
         }
     }
 }

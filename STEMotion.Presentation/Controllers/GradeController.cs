@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
+using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Application.Services;
 
@@ -21,10 +22,10 @@ namespace STEMotion.Presentation.Controllers
         [EndpointDescription("API này sẽ lấy tất cả Grade trong db")]
         // GET: api/<GradeController>
         [HttpGet]
-        public async Task<IActionResult> GetAllGrade()
+        public async Task<IActionResult> GetAllGrade([FromQuery] PaginationRequestDTO requestDTO)
         {
-            var users = await _gradeService.GetAllGrade();
-            return Ok(users);
+            var result = await _gradeService.GetAllGrade(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<GradeResponseDTO>>.Success(result, "Lấy danh sách khối lớp thành công"));
         }
 
         [EndpointDescription("API này lấy Grade theo Id")]
@@ -32,8 +33,8 @@ namespace STEMotion.Presentation.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGradeByIdAsync(Guid id)
         {
-            var user = await _gradeService.GetGradeById(id);
-            return Ok(user);
+            var result = await _gradeService.GetGradeById(id);
+            return Ok(ResponseDTO<GradeResponseDTO>.Success(result, "Lấy thông tin khối lớp thành công"));
         }
 
         [EndpointDescription("API này để tạo grade")]
@@ -42,18 +43,15 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> CreateGrade([FromBody] GradeRequestDTO createGradeRequest)
         {
             var result = await _gradeService.CreateGrade(createGradeRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<GradeResponseDTO>.Success(result, "Tạo khối lớp thành công"));
         }
-
-
-
         [EndpointDescription("API này để sửa Grade theo Id")]
         // PUT api/<GradeController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGrade(Guid id, [FromBody] UpdateGradeRequest updateGradeRequest)
         {
             var result = await _gradeService.UpdateGrade(id, updateGradeRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<GradeResponseDTO>.Success(result, "Cập nhật khối lớp thành công"));
         }
 
         [EndpointDescription("API này để xóa User theo Id")]
@@ -62,7 +60,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> DeleteGrade(Guid id)
         {
             var result = await _gradeService.DeleteGrade(id);
-            return Ok(result);
+            return Ok(ResponseDTO<bool>.Success(result, "Xóa khối lớp thành công"));
         }
     }
 }

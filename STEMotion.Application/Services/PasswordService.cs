@@ -9,14 +9,17 @@ namespace STEMotion.Application.Services
 {
     public class PasswordService : IPasswordService
     {
+        #region Hash Password
         public string HashPasswords(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
-
+        #endregion Hash Password
+        #region VerifyPassword
         public bool VerifyPassword(string password, string hashedPassword)
         {
             return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         }
+        #endregion VerifyPassword
     }
 }

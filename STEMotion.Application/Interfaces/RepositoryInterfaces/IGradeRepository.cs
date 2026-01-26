@@ -9,5 +9,6 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
 {
     public interface IGradeRepository : IGenericRepository<Grade>
     {
+        Task<Grade?> GetGradeByLevelAsync(int gradeLevel);
     }
 }

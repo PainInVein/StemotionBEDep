@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
+using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,7 +18,7 @@ namespace STEMotion.Application.Controllers
     {
         private readonly IUserService _userService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
         }
@@ -21,10 +26,10 @@ namespace STEMotion.Application.Controllers
         [EndpointDescription("API này lấy tất cả User trong db")]
         // GET: api/<UsersController>
         [HttpGet]
-        public async Task<IActionResult> GetAllUser()
+        public async Task<IActionResult> GetAllUser([FromQuery]PaginationRequestDTO requestDTO)
         {
-            var users = await _userService.GetAllUsers();
-            return Ok(users);
+            var result = await _userService.GetAllUsers(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<UserResponseDTO>>.Success(result, "Lấy danh sách người dùng thành công"));
         }
 
         [EndpointDescription("API này lấy User theo Id")]
@@ -32,8 +37,8 @@ namespace STEMotion.Application.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserByIdAsync(Guid id)
         {
-            var user = await _userService.GetUserById(id);
-            return Ok(user);
+            var result = await _userService.GetUserById(id);
+            return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Tìm thấy thông tin người dùng"));
         }
 
         [EndpointDescription("API này tạo mới User")]
@@ -42,7 +47,7 @@ namespace STEMotion.Application.Controllers
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDTO createUserRequestDTO)
         {
             var result = await _userService.CreateUser(createUserRequestDTO);
-            return Ok(result);
+            return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Tạo người dùng thành công"));
         }
 
         [EndpointDescription("API này cập nhật User theo Id")]
@@ -51,7 +56,7 @@ namespace STEMotion.Application.Controllers
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequestDTO updateUserRequestDTO)
         {
             var result = await _userService.UpdateUser(id, updateUserRequestDTO);
-            return Ok(result);
+            return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Cập nhật người dùng thành công"));
         }
 
         [EndpointDescription("API này xóa User theo Id")]
@@ -60,15 +65,7 @@ namespace STEMotion.Application.Controllers
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var result = await _userService.DeleteUser(id);
-            return Ok(result);
-        }
-
-        [EndpointDescription("API này đăng nhập User")]
-        [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
-        {
-            var result = await _userService.LoginUser(loginRequestDTO);
-            return Ok(result);
+            return Ok(ResponseDTO<bool>.Success(result, "Xóa người dùng thành công"));
         }
     }
 }

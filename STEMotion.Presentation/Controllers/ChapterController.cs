@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
+using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,10 +20,10 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này sẽ lấy tất cả Chapter trong db")]
         [HttpGet]
-        public async Task<IActionResult> GetAllChapter()
+        public async Task<IActionResult> GetAllChapter(PaginationRequestDTO requestDTO)
         {
-            var chapters = await _chapterService.GetAllChapter();
-            return Ok(chapters);
+            var result = await _chapterService.GetAllChapter(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<ChapterResponseDTO>>.Success(result, "Lấy danh sách thành công"));
         }
 
         [EndpointDescription("API này lấy Chapter theo Id")]
@@ -30,7 +31,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> GetChapterByIdAsync(Guid id)
         {
             var chapter = await _chapterService.GetChapterById(id);
-            return Ok(chapter);
+            return Ok(ResponseDTO<ChapterResponseDTO>.Success(chapter, "Lấy thông tin chương học thành công"));
         }
 
         [EndpointDescription("API này để tạo Chapter")]
@@ -38,7 +39,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> CreateChapter([FromBody] ChapterRequestDTO createChapterRequest)
         {
             var result = await _chapterService.CreateChapter(createChapterRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<ChapterResponseDTO>.Success(result, "Tạo chương học thành công"));
         }
 
         [EndpointDescription("API này để sửa Chapter theo Id")]
@@ -46,7 +47,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> UpdateChapter(Guid id, [FromBody] UpdateChapterRequestDTO updateChapterRequest)
         {
             var result = await _chapterService.UpdateChapter(id, updateChapterRequest);
-            return Ok(result);
+            return Ok(ResponseDTO<ChapterResponseDTO>.Success(result, "Cập nhật chương học thành công"));
         }
 
         [EndpointDescription("API này để xóa Chapter theo Id")]
@@ -54,7 +55,7 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> DeleteChapter(Guid id)
         {
             var result = await _chapterService.DeleteChapter(id);
-            return Ok(result);
+            return Ok(ResponseDTO<bool>.Success(result, "Xóa chương học thành công"));
         }
     }
 }
