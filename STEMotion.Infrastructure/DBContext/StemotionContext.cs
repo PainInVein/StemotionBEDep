@@ -25,6 +25,8 @@ public partial class StemotionContext : DbContext
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Chapter> Chapters { get; set; }
     public DbSet<Lesson> Lessons { get; set; }
+
+    public DbSet<Payment> Payments { get; set; }
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -254,6 +256,57 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(l => l.ChapterId)
                 .HasConstraintName("FK_Lesson.chapter_id")
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+
+        //Payment Entity Configuration
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.ToTable("Payment");                   
+
+            entity.HasKey(e => e.PaymentId);
+
+            entity.Property(e => e.PaymentId)
+                  .HasColumnName("paymentId")
+                  .HasDefaultValueSql("NEWID()")
+                  .IsRequired();
+
+            entity.Property(e => e.UserId)
+                  .HasColumnName("userId")
+                  .IsRequired();
+
+            entity.Property(e => e.Info)
+                  .HasColumnName("info")
+                  .HasMaxLength(500)                     
+                  .IsRequired();                         
+
+            entity.Property(e => e.Amount)
+                  .HasColumnName("amount")
+                  .HasPrecision(18, 2)                   
+                  .IsRequired();
+
+            entity.Property(e => e.PaymentDate)
+                  .HasColumnName("paymentDate")
+                  .HasDefaultValueSql("GETDATE()")
+                  .IsRequired();
+
+            entity.Property(e => e.TransactionId)
+                  .HasColumnName("transactionId")
+                  .HasMaxLength(100)                     
+                  .IsRequired();                         
+
+            entity.Property(e => e.Status)
+                  .HasColumnName("status")
+                  .HasMaxLength(50)
+                  .IsRequired();
+
+            //relationship
+            entity.HasOne(p => p.User)
+                  .WithMany(u => u.Payments)             
+                  .HasForeignKey(p => p.UserId)
+                  .HasConstraintName("FK_Payment_userId")
+                  .OnDelete(DeleteBehavior.Restrict);    
         });
     }
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
