@@ -57,5 +57,12 @@ namespace STEMotion.Presentation.Controllers
             var result = await _subjectService.DeleteSubject(id);
             return Ok(ResponseDTO<bool>.Success(result, "Xóa môn học thành công"));
         }
+
+        [HttpGet("/get-by-subject/{gradeLevel}")]
+        public async Task<IActionResult> GetSubjectByGrade([FromQuery]PaginationRequestDTO requestDTO,int gradeLevel)
+        {
+            var result = await _subjectService.GetSubjectByGradeLevel(requestDTO,gradeLevel);
+            return Ok(ResponseDTO<PaginatedResponseDTO<SubjectResponseDTO>>.Success(result, "Tìm thấy  thành công"));
+        }
     }
 }

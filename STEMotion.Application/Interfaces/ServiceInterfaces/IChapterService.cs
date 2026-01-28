@@ -15,5 +15,8 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         Task<ChapterResponseDTO> CreateChapter(ChapterRequestDTO requestDTO);
         Task<ChapterResponseDTO> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO);
         Task<bool> DeleteChapter(Guid id);
+
+        Task<PaginatedResponseDTO<ChapterResponseDTO>> GetChapterBySubjectName(PaginationRequestDTO requestDTO, string subjectName);
+
     }
 }

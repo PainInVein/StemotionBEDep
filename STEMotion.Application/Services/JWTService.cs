@@ -33,7 +33,7 @@ namespace STEMotion.Application.Services
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Email, email),
-                new Claim(ClaimTypes.Role, role),
+                new Claim("Role", role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

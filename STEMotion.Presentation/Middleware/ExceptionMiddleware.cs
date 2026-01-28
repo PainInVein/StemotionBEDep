@@ -24,7 +24,7 @@ namespace STEMotion.Presentation.Middleware
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, 500, "Lỗi hệ thống", "INTERNAL_SERVER_ERROR");
+                await HandleExceptionAsync(context, 500, ex.Message, "INTERNAL_SERVER_ERROR");
             }
         }
 

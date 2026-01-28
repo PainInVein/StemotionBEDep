@@ -2,6 +2,7 @@
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
+using STEMotion.Application.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,7 +21,7 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này sẽ lấy tất cả Chapter trong db")]
         [HttpGet]
-        public async Task<IActionResult> GetAllChapter(PaginationRequestDTO requestDTO)
+        public async Task<IActionResult> GetAllChapter([FromQuery]PaginationRequestDTO requestDTO)
         {
             var result = await _chapterService.GetAllChapter(requestDTO);
             return Ok(ResponseDTO<PaginatedResponseDTO<ChapterResponseDTO>>.Success(result, "Lấy danh sách thành công"));
@@ -36,7 +37,7 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này để tạo Chapter")]
         [HttpPost]
-        public async Task<IActionResult> CreateChapter([FromBody] ChapterRequestDTO createChapterRequest)
+        public async Task<IActionResult> CreateChapter( ChapterRequestDTO createChapterRequest)
         {
             var result = await _chapterService.CreateChapter(createChapterRequest);
             return Ok(ResponseDTO<ChapterResponseDTO>.Success(result, "Tạo chương học thành công"));
@@ -56,6 +57,13 @@ namespace STEMotion.Presentation.Controllers
         {
             var result = await _chapterService.DeleteChapter(id);
             return Ok(ResponseDTO<bool>.Success(result, "Xóa chương học thành công"));
+        }
+
+        [HttpGet("/get-by-chapter/{subjectName}")]
+        public async Task<IActionResult> GetSubjectByGrade([FromQuery] PaginationRequestDTO requestDTO, string subjectName)
+        {
+            var result = await _chapterService.GetChapterBySubjectName(requestDTO, subjectName);
+            return Ok(ResponseDTO<PaginatedResponseDTO<ChapterResponseDTO>>.Success(result, "Tìm thấy  thành công"));
         }
     }
 }

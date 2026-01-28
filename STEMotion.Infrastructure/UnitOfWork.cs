@@ -20,8 +20,6 @@ namespace STEMotion.Infrastructure
             _context = context;
         }
 
-
-
         // IDisposable Implementation
         private bool disposed = false;
 
@@ -41,6 +39,15 @@ namespace STEMotion.Infrastructure
         public IChapterRepository ChapterRepository => _chapterRepository ??= new ChapterRepository(_context);
         private ILessonRepository _lessonRepository;
         public ILessonRepository LessonRepository => _lessonRepository ??= new LessonRepository(_context);
+
+        private ILessonContentRepository _lessonContentRepository;
+
+        public ILessonContentRepository LessonContentRepository => _lessonContentRepository ??= new LessonContentRepository(_context);
+        private IGameRepository _gameRepository;
+        public IGameRepository GameRepository => _gameRepository ??= new GameRepository(_context);
+
+        private IGameResultRepository _gameResultRepository;
+        public IGameResultRepository GameResultRepository => _gameResultRepository ??= new GameResultRepository(_context);
 
         public IPaymentRepository _paymentRepository;
         public IPaymentRepository PaymentRepository => _paymentRepository ??= new PaymentRepository(_context);
