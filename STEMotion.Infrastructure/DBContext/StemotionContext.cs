@@ -25,6 +25,10 @@ public partial class StemotionContext : DbContext
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Chapter> Chapters { get; set; }
     public DbSet<Lesson> Lessons { get; set; }
+
+    public DbSet<Payment> Payments { get; set; }
+
+    public DbSet<Subscription> Subscriptions { get; set; }
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -255,6 +259,98 @@ public partial class StemotionContext : DbContext
                 .HasConstraintName("FK_Lesson.chapter_id")
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+
+
+        //Payment Entity Configuration
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.ToTable("Payment");
+
+            entity.HasKey(e => e.PaymentId);
+
+            entity.Property(e => e.PaymentId)
+                  .HasColumnName("payment_id")
+                  .HasDefaultValueSql("NEWID()")
+                  .IsRequired();
+
+            entity.Property(e => e.UserId)
+                  .HasColumnName("user_id")
+                  .IsRequired();
+
+            entity.Property(e => e.Info)
+                  .HasColumnName("info")
+                  .HasMaxLength(500)
+                  .IsRequired();
+
+            entity.Property(e => e.Amount)
+                  .HasColumnName("amount")
+                  .HasPrecision(18, 2)
+                  .IsRequired();
+
+            entity.Property(e => e.PaymentDate)
+                  .HasColumnName("payment_date")
+                  .HasDefaultValueSql("GETDATE()")
+                  .IsRequired();
+
+            entity.Property(e => e.TransactionId)
+                  .HasColumnName("transaction_id")
+                  .HasMaxLength(100)
+                  .IsRequired();
+
+            entity.Property(e => e.Status)
+                  .HasColumnName("status")
+                  .HasMaxLength(50)
+                  .IsRequired();
+
+            entity.HasOne(p => p.User)
+                  .WithMany(u => u.Payments)
+                  .HasForeignKey(p => p.UserId)
+                  .HasConstraintName("FK_Payment_UserId")
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+
+        //Subscription Entity Configuration
+        modelBuilder.Entity<Subscription>(entity =>
+        {
+            entity.ToTable("Subscription");
+
+            entity.HasKey(e => e.SubscriptionId);
+
+            entity.Property(e => e.SubscriptionId)
+                .HasColumnName("subscription_id")
+                .HasDefaultValueSql("NEWID()")
+                .IsRequired();
+
+            entity.Property(e => e.SubscriptionName)
+                .HasColumnName("subscription_name")
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
+
+            entity.Property(e => e.SubscriptionPrice)
+                .HasColumnName("subscription_price")
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            entity.Property(e => e.BillingPeriod)
+                .HasColumnName("billing_period")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(e => e.IsActive)
+                .HasColumnName("is_active")
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("GETDATE()");
+        });
+
     }
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
