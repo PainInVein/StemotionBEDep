@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using STEMotion.Application.DTO.ResponseDTOs;
+using STEMotion.Application.Exceptions;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Domain.Entities;
@@ -21,9 +23,15 @@ namespace STEMotion.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<Subscription?> GetSubscriptionByIdAsync(Guid subscriptionId)
+        public async Task<SubscriptionResponseDTO?> GetSubscriptionByIdAsync(Guid subscriptionId)
         {
-            return await _unitOfWork.SubscriptionRepository.GetSubscriptionByIdAsync(subscriptionId);
+            var result = await _unitOfWork.SubscriptionRepository.GetSubscriptionByIdAsync(subscriptionId);
+            if (result == null)
+            {
+                throw new NotFoundException("Gói này không tồn tại");
+            }
+            var response = _mapper.Map<SubscriptionResponseDTO>(result);
+            return response;
         }
     }
 }

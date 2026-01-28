@@ -16,13 +16,13 @@ namespace STEMotion.Presentation.Controllers
         }
 
 
-        //[EndpointDescription("API này lấy thông tin gói lên để đăng kí")]
-        //// GET: api/<SubscriptionController>
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllUser(Guid subscriptionId)
-        //{
-        //    var result = await _subscriptionService.GetSubscriptionByIdAsync(subscriptionId);
-        //    return Ok(ResponseDTO<bool>.Success(result, "User đã mua gói"));
-        //}
+        [EndpointDescription("API này lấy thông tin gói lên để đăng kí")]
+        // GET: api/<SubscriptionController>
+        [HttpGet]
+        public async Task<IActionResult> GetAllUser(Guid subscriptionId)
+        {
+            var result = await _subscriptionService.GetSubscriptionByIdAsync(subscriptionId);
+            return Ok(ResponseDTO<SubscriptionResponseDTO?>.Success(result, "Tìm thấy thông tin gói"));
+        }
     }
 }

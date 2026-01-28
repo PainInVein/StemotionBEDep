@@ -1,4 +1,5 @@
-﻿using STEMotion.Domain.Entities;
+﻿using STEMotion.Application.DTO.ResponseDTOs;
+using STEMotion.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface ISubscriptionService
     {
-        Task<Subscription?> GetSubscriptionByIdAsync(Guid subscriptionId);
+        Task<SubscriptionResponseDTO?> GetSubscriptionByIdAsync(Guid subscriptionId);
     }
 }
