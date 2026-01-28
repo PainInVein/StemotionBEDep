@@ -113,11 +113,17 @@ namespace STEMotion.Application.Services
 
         }
 
-        public async Task<IEnumerable<UserResponseDTO>> GetAllUsers()
+        public async Task<PaginatedResponseDTO<UserResponseDTO>> GetAllUsers(PaginationRequestDTO requestDTO)
         {
-            var items = await _unitOfWork.UserRepository.FindAllAsync(u => u.Role);
+            var (items, total) = await _unitOfWork.UserRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize);
             var response = _mapper.Map<IEnumerable<UserResponseDTO>>(items);
-            return response;
+            return new PaginatedResponseDTO<UserResponseDTO> 
+            {
+                Items = response,
+                PageSize = requestDTO.PageSize,
+                PageNumber = requestDTO.PageNumber,
+                TotalCount = total
+            };
         }
 
         public async Task<UserResponseDTO> GetUserById(Guid id)

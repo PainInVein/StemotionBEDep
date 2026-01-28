@@ -66,11 +66,17 @@ namespace STEMotion.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<LessonResponseDTO>> GetAllLesson()
+        public async Task<PaginatedResponseDTO<LessonResponseDTO>> GetAllLesson(PaginationRequestDTO requestDTO)
         {
-            var lesson = await _unitOfWork.LessonRepository.FindAllAsync(x => x.Chapter);
+            var (lesson, total) = await _unitOfWork.LessonRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize);
             var response = _mapper.Map<IEnumerable<LessonResponseDTO>>(lesson);
-            return response;
+            return new PaginatedResponseDTO<LessonResponseDTO>
+            {
+                Items = response,
+                PageSize = requestDTO.PageSize,
+                PageNumber = requestDTO.PageNumber,
+                TotalCount = total
+            };
         }
 
         public async Task<LessonResponseDTO> GetLessonById(Guid id)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STEMotion.Infrastructure.DBContext;
 
@@ -11,9 +12,11 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    partial class StemotionContextModelSnapshot : ModelSnapshot
+    [Migration("20260128101109_UpdatePaymentTable")]
+    partial class UpdatePaymentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -185,7 +188,7 @@ namespace STEMotion.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Payment", (string)null);
+                    b.ToTable("payment", (string)null);
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Role", b =>
@@ -423,7 +426,7 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_Payment_UserId");
+                        .HasConstraintName("fk_payment_user_id");
 
                     b.Navigation("User");
                 });

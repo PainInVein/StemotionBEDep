@@ -20,10 +20,10 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này sẽ lấy tất cả Chapter trong db")]
         [HttpGet]
-        public async Task<IActionResult> GetAllChapter()
+        public async Task<IActionResult> GetAllChapter(PaginationRequestDTO requestDTO)
         {
-            var result = await _chapterService.GetAllChapter();
-            return Ok(ResponseDTO<IEnumerable<ChapterResponseDTO>>.Success(result, "Lấy danh sách thành công"));
+            var result = await _chapterService.GetAllChapter(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<ChapterResponseDTO>>.Success(result, "Lấy danh sách thành công"));
         }
 
         [EndpointDescription("API này lấy Chapter theo Id")]

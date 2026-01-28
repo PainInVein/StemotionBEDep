@@ -12,7 +12,7 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface ISubjectService 
     {
-        Task<IEnumerable<SubjectResponseDTO>> GetAllSubject();
+        Task<PaginatedResponseDTO<SubjectResponseDTO>> GetAllSubject(PaginationRequestDTO requestDTO);
         Task<SubjectResponseDTO> GetSubjectById(Guid id);
         Task<SubjectResponseDTO> CreateSubject(SubjectRequestDTO requestDTO);
         Task<SubjectResponseDTO> UpdateSubject(Guid id, UpdateSubjectRequestDTO requestDTO);

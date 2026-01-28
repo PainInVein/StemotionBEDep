@@ -10,7 +10,7 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserResponseDTO>> GetAllUsers();
+        Task<PaginatedResponseDTO<UserResponseDTO>> GetAllUsers(PaginationRequestDTO requestDTO);
         Task<UserResponseDTO> GetUserById(Guid id);
         Task<UserResponseDTO> CreateUser(CreateUserRequestDTO user);
         Task<UserResponseDTO> UpdateUser(Guid id, UpdateUserRequestDTO user);

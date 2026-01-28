@@ -20,10 +20,10 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này sẽ lấy tất cả Lesson trong db")]
         [HttpGet]
-        public async Task<IActionResult> GetAllLesson()
+        public async Task<IActionResult> GetAllLesson([FromQuery] PaginationRequestDTO requestDTO)
         {
-            var result = await _lessonService.GetAllLesson();
-            return Ok(ResponseDTO<IEnumerable<LessonResponseDTO>>.Success(result, "Lấy danh sách bài học thành công"));
+            var result = await _lessonService.GetAllLesson(requestDTO);
+            return Ok(ResponseDTO<PaginatedResponseDTO<LessonResponseDTO>>.Success(result, "Lấy danh sách bài học thành công"));
         }
 
         [EndpointDescription("API này lấy Lesson theo Id")]
