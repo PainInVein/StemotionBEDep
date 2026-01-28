@@ -42,6 +42,9 @@ namespace STEMotion.Infrastructure
         private ILessonRepository _lessonRepository;
         public ILessonRepository LessonRepository => _lessonRepository ??= new LessonRepository(_context);
 
+        public IPaymentRepository _paymentRepository;
+        public IPaymentRepository PaymentRepository => _paymentRepository ??= new PaymentRepository(_context);
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)

@@ -67,14 +67,5 @@ namespace STEMotion.Application.Controllers
             var result = await _userService.DeleteUser(id);
             return Ok(ResponseDTO<bool>.Success(result, "Xóa người dùng thành công"));
         }
-
-        [EndpointDescription("API check user mua gói chưa")]
-        // DELETE api/<UsersController>/5
-        [HttpPost("purchasestatus/{id}")]
-        public async Task<IActionResult> CheckPurchaseStatus(Guid id)
-        {
-            var result = await _userService.DeleteUser(id);
-            return Ok(ResponseDTO<bool>.Success(result, "Xóa người dùng thành công"));
-        }
     }
 }

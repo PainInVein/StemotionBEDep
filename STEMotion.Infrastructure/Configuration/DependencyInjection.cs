@@ -44,6 +44,10 @@ namespace STEMotion.Infrastructure.Configuration
             services.AddScoped<ILessonService, LessonService>();
             services.AddScoped<ISubjectRepository, SubjectRepository>();
             services.AddScoped<ISubjectService, SubjectService>();
+
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IPaymentService, PaymentService>();
+
             services.AddScoped(typeof(IEmailService), typeof(SmtpEmailService));
             services.AddScoped<IOtpService, OtpService>();
             services.AddAuthentication(opt =>
