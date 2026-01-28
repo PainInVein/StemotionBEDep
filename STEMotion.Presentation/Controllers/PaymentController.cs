@@ -19,7 +19,7 @@ namespace STEMotion.Presentation.Controllers
 
         [EndpointDescription("API này check user mua gói chưa")]
         // GET: api/<PaymentController>
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetAllUser(Guid userId)
         {
             var result = await _paymentService.CheckUserPaymentAsync(userId);
