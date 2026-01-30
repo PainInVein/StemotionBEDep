@@ -8,23 +8,27 @@ namespace STEMotion.Domain.Entities
 {
     public class Subscription
     {
-        
-            public Guid SubscriptionId { get; set; }
 
-            // Plan info
-            public string SubscriptionName { get; set; } = null!;          // e.g. "Individual"
-            public string? Description { get; set; }
+        public Guid SubscriptionId { get; set; }
 
-            // Pricing
-            public decimal SubscriptionPrice { get; set; }                  // 143200
+        // Plan info
+        public string SubscriptionName { get; set; } = null!;          // e.g. "Individual"
+        public string? Description { get; set; }
 
-            // Billing
-            public string BillingPeriod { get; set; } = "Month"; // Month / Year
+        // Pricing
+        public decimal SubscriptionPrice { get; set; }                  // 143200
 
-            // Status
-            public bool IsActive { get; set; } = true;
+        // Billing
+        public string BillingPeriod { get; set; } = "Month"; // Month / Year
 
-            // Audit
-            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // Status
+        public bool IsActive { get; set; } = true;
+
+        // Audit
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // navigation convenience
+        public virtual ICollection<SubscriptionPayment> SubscriptionPayments { get; set; } = new List<SubscriptionPayment>();
+
     }
 }
