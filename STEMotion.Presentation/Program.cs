@@ -12,12 +12,15 @@ builder.Services.ConfigureRedis(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//payOS
+builder.Services.AddPayOSConfiguration(builder.Configuration);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5175", "http://localhost:5174", "http://localhost:5173")
+            policy.WithOrigins("http://localhost:5175", "http://localhost:5174", "http://localhost:5173", "https://payment-testing-fe.vercel.app")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
