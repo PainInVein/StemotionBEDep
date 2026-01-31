@@ -26,6 +26,7 @@ namespace STEMotion.Application.Services
             _mapper = mapper;
         }
         #endregion cto
+        #region CRUD
         public async Task<SubjectResponseDTO> CreateSubject(SubjectRequestDTO requestDTO)
         {
             var grade = await _unitOfWork.GradeRepository.GetGradeByLevelAsync(requestDTO.GradeLevel);
@@ -68,9 +69,9 @@ namespace STEMotion.Application.Services
 
         public async Task<PaginatedResponseDTO<SubjectResponseDTO>> GetAllSubject(PaginationRequestDTO requestDTO)
         {
-            var (subject, total) = await _unitOfWork.SubjectRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize);
+            var (subject, total) = await _unitOfWork.SubjectRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, null, x => x.Grade);
             var response = _mapper.Map<IEnumerable<SubjectResponseDTO>>(subject);
-            return new PaginatedResponseDTO<SubjectResponseDTO> 
+            return new PaginatedResponseDTO<SubjectResponseDTO>
             {
                 Items = response,
                 PageNumber = requestDTO.PageNumber,
@@ -78,7 +79,6 @@ namespace STEMotion.Application.Services
                 TotalCount = total
             };
         }
-
         public async Task<SubjectResponseDTO> GetSubjectById(Guid id)
         {
             var result = await _unitOfWork.SubjectRepository.GetSubjectByIdWithGradeAsync(id);
@@ -92,39 +92,53 @@ namespace STEMotion.Application.Services
 
         public async Task<SubjectResponseDTO> UpdateSubject(Guid id, UpdateSubjectRequestDTO requestDTO)
         {
-                var subject = await _unitOfWork.SubjectRepository.GetSubjectByIdWithGradeAsync(id);
-                if (subject == null)
-                {
-                    throw new NotFoundException("Môn học này không tồn tại");
-                }
-                if (subject.Grade.GradeLevel != requestDTO.GradeLevel)
-                {
+            var subject = await _unitOfWork.SubjectRepository.GetSubjectByIdWithGradeAsync(id);
+            if (subject == null)
+            {
+                throw new NotFoundException("Môn học này không tồn tại");
+            }
+            if (subject.Grade.GradeLevel != requestDTO.GradeLevel)
+            {
                 var newGrade = await _unitOfWork.GradeRepository.GetGradeByLevelAsync(requestDTO.GradeLevel);
-                    if (newGrade == null)
-                    {
-                       throw new NotFoundException("Lớp", requestDTO.GradeLevel);
-                    }
-
-                    subject.GradeId = newGrade.GradeId;
-                    subject.Grade = newGrade;
-                }
-                if (subject.SubjectName != requestDTO.SubjectName || subject.Grade.GradeLevel != requestDTO.GradeLevel)
+                if (newGrade == null)
                 {
-                    var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
-                        x.GradeId == subject.GradeId &&
-                        x.SubjectName.ToLower() == requestDTO.SubjectName.ToLower() &&
-                        x.SubjectId != id);
-
-                    if (existing)
-                    {
-                        throw new AlreadyExistsException($"{requestDTO.SubjectName}", $"{requestDTO.GradeLevel}");
-                    }
+                    throw new NotFoundException("Lớp", requestDTO.GradeLevel);
                 }
-                _mapper.Map(requestDTO, subject);
-                _unitOfWork.SubjectRepository.Update(subject);
-                await _unitOfWork.SaveChangesAsync();
-                var response = _mapper.Map<SubjectResponseDTO>(subject);
-                return response;
+
+                subject.GradeId = newGrade.GradeId;
+                subject.Grade = newGrade;
+            }
+            if (subject.SubjectName != requestDTO.SubjectName || subject.Grade.GradeLevel != requestDTO.GradeLevel)
+            {
+                var existing = await _unitOfWork.SubjectRepository.ExistsAsync(x =>
+                    x.GradeId == subject.GradeId &&
+                    x.SubjectName.ToLower() == requestDTO.SubjectName.ToLower() &&
+                    x.SubjectId != id);
+
+                if (existing)
+                {
+                    throw new AlreadyExistsException($"{requestDTO.SubjectName}", $"{requestDTO.GradeLevel}");
+                }
+            }
+            _mapper.Map(requestDTO, subject);
+            _unitOfWork.SubjectRepository.Update(subject);
+            await _unitOfWork.SaveChangesAsync();
+            var response = _mapper.Map<SubjectResponseDTO>(subject);
+            return response;
         }
+        #endregion CRUD
+        public async Task<PaginatedResponseDTO<SubjectResponseDTO>> GetSubjectByGradeLevel(PaginationRequestDTO requestDTO, int gradeLevel)
+        {
+            var (subject, total) = await _unitOfWork.SubjectRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, x => x.Grade.GradeLevel == gradeLevel, x => x.Grade);
+            var response = _mapper.Map<IEnumerable<SubjectResponseDTO>>(subject);
+            return new PaginatedResponseDTO<SubjectResponseDTO>
+            {
+                Items = response,
+                PageNumber = requestDTO.PageNumber,
+                PageSize = requestDTO.PageSize,
+                TotalCount = total
+            };
+        }
+
     }
 }

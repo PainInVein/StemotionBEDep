@@ -32,6 +32,8 @@ public partial class StemotionContext : DbContext
 
     public DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
 
+    public DbSet<Game> Games { get; set; }
+    public DbSet<GameResult> GameResults { get; set; }
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -262,10 +264,53 @@ public partial class StemotionContext : DbContext
                 .HasConstraintName("FK_Lesson.chapter_id")
                 .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<LessonContent>(entity =>
+        {
+            entity.ToTable("LessonContent");
+            entity.HasKey(e => e.LessonContentId);
 
+            entity.Property(e => e.LessonContentId)
+                .HasColumnName("lesson_content_id")
+                .HasDefaultValueSql("NEWID()");
 
+            entity.Property(e => e.LessonId)
+                .HasColumnName("lesson_id")
+                .IsRequired();
 
-        //Payment Entity Configuration
+            entity.Property(e => e.ContentType)
+                .HasColumnName("content_type")
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.TextContent)
+                .HasColumnName("text_content")
+                .IsRequired(false);
+
+            entity.Property(e => e.MediaUrl)
+                .HasColumnName("media_url")
+                .HasMaxLength(500)
+                .IsRequired(false);
+
+            entity.Property(e => e.FormulaLatex)
+                .HasColumnName("formula_latex")
+                .IsRequired(false);
+
+            entity.Property(e => e.OrderIndex)
+                .HasColumnName("order_index")
+                .IsRequired();
+
+            entity.Property(e => e.Status)
+                .HasColumnName("status")
+                .HasMaxLength(50)
+                .HasDefaultValue("Active");
+
+            entity.HasOne(lc => lc.Lesson)
+                .WithMany(l => l.LessonContents)
+                .HasForeignKey(lc => lc.LessonId)
+                .HasConstraintName("FK_LessonContent.lesson_id")
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.ToTable("Payment");
@@ -444,6 +489,162 @@ public partial class StemotionContext : DbContext
             //    .HasForeignKey(sp => sp.SubscriptionId)
             //    .HasConstraintName("FK_SubscriptionPayment_Subscription")
             //    .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Game>(entity =>
+        {
+            entity.ToTable("Game");
+            entity.HasKey(e => e.GameId);
+
+            entity.Property(e => e.GameId)
+                .HasColumnName("game_id")
+                .HasDefaultValueSql("NEWID()");
+
+            entity.Property(e => e.Name)
+                .HasColumnName("name")
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(e => e.GameCode)
+                .HasColumnName("game_code")
+                .IsRequired()
+                .HasMaxLength(100);
+
+            // Unique constraint cho GameCode
+            entity.HasIndex(e => e.GameCode)
+                .IsUnique()
+                .HasDatabaseName("IX_Game_GameCode");
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description")
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.LessonId)
+                .HasColumnName("lesson_id")
+                .IsRequired();
+
+            entity.Property(e => e.ConfigData)
+                .HasColumnName("config_data")
+                .IsRequired()
+                .HasColumnType("nvarchar(max)"); // JSON data
+
+            entity.Property(e => e.Status)
+                .HasColumnName("status")
+                .IsRequired()
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.ThumbnailUrl)
+                .HasColumnName("thumbnail_url")
+                .HasMaxLength(500);
+
+            // Foreign Key
+            entity.HasOne(g => g.Lesson)
+                .WithMany()
+                .HasForeignKey(g => g.LessonId)
+                .HasConstraintName("FK_Game.lesson_id")
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ⭐ CONFIGURATION CHO GAMERESULT
+        modelBuilder.Entity<GameResult>(entity =>
+        {
+            entity.ToTable("GameResult");
+            entity.HasKey(e => e.GameResultId);
+
+            entity.Property(e => e.GameResultId)
+                .HasColumnName("game_result_id")
+                .HasDefaultValueSql("NEWID()");
+
+            entity.Property(e => e.StudentId)
+                .HasColumnName("student_id")
+                .IsRequired();
+
+            entity.Property(e => e.GameId)
+                .HasColumnName("game_id")
+                .IsRequired();
+
+            entity.Property(e => e.Score)
+                .HasColumnName("score")
+                .IsRequired()
+                .HasColumnType("decimal(5,2)"); // Ví dụ: 95.50
+
+            entity.Property(e => e.CorrectAnswers)
+                .HasColumnName("correct_answers")
+                .IsRequired();
+
+            entity.Property(e => e.TotalQuestions)
+                .HasColumnName("total_questions")
+                .IsRequired();
+
+            entity.Property(e => e.PlayDuration)
+                .HasColumnName("play_duration")
+                .IsRequired(); // Seconds
+
+            entity.Property(e => e.PlayedAt)
+                .HasColumnName("played_at")
+                .IsRequired()
+                .HasDefaultValueSql("GETDATE()");
+
+            // Index để query nhanh hơn
+            entity.HasIndex(e => new { e.StudentId, e.GameId })
+                .HasDatabaseName("IX_GameResult_StudentId_GameId");
+
+            entity.HasIndex(e => e.PlayedAt)
+                .HasDatabaseName("IX_GameResult_PlayedAt");
+
+            // Foreign Keys
+            entity.HasOne(gr => gr.Student)
+                .WithMany()
+                .HasForeignKey(gr => gr.StudentId)
+                .HasConstraintName("FK_GameResult.student_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(gr => gr.Game)
+                .WithMany(g => g.GameResults)
+                .HasForeignKey(gr => gr.GameId)
+                .HasConstraintName("FK_GameResult.game_id")
+                .OnDelete(DeleteBehavior.Cascade); // Xóa game thì xóa luôn kết quả
+        });
+
+
+
+        //Subscription Entity Configuration
+        modelBuilder.Entity<Subscription>(entity =>
+        {
+            entity.ToTable("Subscription");
+
+            entity.HasKey(e => e.SubscriptionId);
+
+            entity.Property(e => e.SubscriptionId)
+                .HasColumnName("subscription_id")
+                .HasDefaultValueSql("NEWID()")
+                .IsRequired();
+
+            entity.Property(e => e.SubscriptionName)
+                .HasColumnName("subscription_name")
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
+
+            entity.Property(e => e.SubscriptionPrice)
+                .HasColumnName("subscription_price")
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            entity.Property(e => e.BillingPeriod)
+                .HasColumnName("billing_period")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(e => e.IsActive)
+                .HasColumnName("is_active")
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("GETDATE()");
         });
 
     }

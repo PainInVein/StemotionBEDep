@@ -15,5 +15,8 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         Task<LessonResponseDTO> CreateLesson(LessonRequestDTO requestDTO);
         Task<LessonResponseDTO> UpdateLesson(Guid id, UpdateLessonRequestDTO requestDTO);
         Task<bool> DeleteLesson(Guid id);
+
+        Task<PaginatedResponseDTO<LessonResponseDTO>> GetSubjectByChapterName(PaginationRequestDTO requestDTO, string chapterName);
+
     }
 }

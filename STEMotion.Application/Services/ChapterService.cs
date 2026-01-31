@@ -29,7 +29,7 @@ namespace STEMotion.Application.Services
         #region CRUD
         public async Task<PaginatedResponseDTO<ChapterResponseDTO>> GetAllChapter(PaginationRequestDTO requestDTO)
         {
-            var (chapters, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber,requestDTO.PageSize);
+            var (chapters, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber,requestDTO.PageSize, null, x => x.Subject);
             var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapters);
             return new PaginatedResponseDTO<ChapterResponseDTO>
             {
@@ -119,6 +119,21 @@ namespace STEMotion.Application.Services
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
+
+        public async Task<PaginatedResponseDTO<ChapterResponseDTO>> GetChapterBySubjectName(PaginationRequestDTO requestDTO, string subjectName)
+        {
+            var (chapter, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, x => x.Subject.SubjectName == subjectName, x => x.Subject);
+            var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapter);
+            return new PaginatedResponseDTO<ChapterResponseDTO>
+            {
+                Items = response,
+                PageNumber = requestDTO.PageNumber,
+                PageSize = requestDTO.PageSize,
+                TotalCount = total
+            };
+        }
         #endregion CRUD
+
+
     }
 }

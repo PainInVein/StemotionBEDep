@@ -53,6 +53,12 @@ namespace STEMotion.Infrastructure.Configuration
 
             services.AddScoped(typeof(IEmailService), typeof(SmtpEmailService));
             services.AddScoped<IOtpService, OtpService>();
+            services.AddScoped<ILessonContentRepository, LessonContentRepository>();
+            services.AddScoped<ILessonContentService, LessonContentService>();
+            services.AddScoped<IGameRepository, GameRepository>();
+            services.AddScoped<IGameService, GameService>();
+            services.AddScoped<IGameResultRepository, GameResultRepository>();
+            services.AddScoped<IGameResultService, GameResultService>();
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
