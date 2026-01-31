@@ -16,12 +16,13 @@ namespace STEMotion.Domain.Entities
 
         public DateTime PaymentDate { get; set; }
 
-        public string TransactionId { get; set; }
-
         public string Status { get; set; }
 
         public Guid UserId { get; set; }
 
         public virtual User User { get; set; }
+
+        public virtual ICollection<SubscriptionPayment> SubscriptionPayments { get; set; } = new List<SubscriptionPayment>();
+
     }
 }

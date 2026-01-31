@@ -57,6 +57,7 @@ namespace STEMotion.Application.Middleware
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Active"))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now));
 
+            CreateMap<Subscription, SubscriptionResponseDTO>().ReverseMap();
             CreateMap<LessonContent, LessonContentResponseDTO>();
 
             CreateMap<CreateLessonContentRequestDTO, LessonContent>()
