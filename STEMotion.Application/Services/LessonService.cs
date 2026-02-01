@@ -27,7 +27,7 @@ namespace STEMotion.Application.Services
 
         public async Task<LessonResponseDTO> CreateLesson(LessonRequestDTO requestDTO)
         {
-            var chapter = await _unitOfWork.ChapterRepository.GetByIdAsync(requestDTO.ChapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterWithSubjectAndGradeAsync(requestDTO.ChapterId);
 
             if (chapter == null)
             {

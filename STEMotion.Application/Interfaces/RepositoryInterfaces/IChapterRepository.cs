@@ -10,5 +10,7 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
     public interface IChapterRepository : IGenericRepository<Chapter>
     {
         Task<IEnumerable<Chapter>> GetAllChapterAsync();
+        Task<Chapter?> GetChapterWithSubjectAndGradeAsync(Guid chapterId);
+
     }
 }
