@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STEMotion.Infrastructure.DBContext;
 
@@ -11,9 +12,11 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    partial class StemotionContextModelSnapshot : ModelSnapshot
+    [Migration("20260130101725_UpdatePaymentSubscriptionAllowNull")]
+    partial class UpdatePaymentSubscriptionAllowNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -307,7 +310,7 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("account_number");
 
-                    b.Property<decimal?>("Amount")
+                    b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
@@ -343,6 +346,7 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnName("description");
 
                     b.Property<long?>("OrderCode")
+                        .IsRequired()
                         .HasColumnType("bigint")
                         .HasColumnName("order_code");
 
@@ -365,10 +369,12 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnName("subscription_id");
 
                     b.Property<bool?>("Success")
+                        .IsRequired()
                         .HasColumnType("bit")
                         .HasColumnName("is_success");
 
                     b.Property<DateTime?>("TransactionDateTime")
+                        .IsRequired()
                         .HasColumnType("datetime2")
                         .HasColumnName("transaction_datetime");
 

@@ -2,6 +2,7 @@
 using PayOS;
 using PayOS.Models.V2.PaymentRequests;
 using PayOS.Models.Webhooks;
+using STEMotion.Application.DTO.RequestDTOs.PaymentReqDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 
@@ -29,30 +30,11 @@ namespace STEMotion.Presentation.Controllers
         }
 
         [HttpPost("create-payment-intent")]
-        public async Task<IActionResult> Create([FromBody] CreatePaymentDto dto)
+        public async Task<IActionResult> Create([FromBody] PaymentInfoRequestDTO paymentInfoRequestDTO)
         {
-            var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var response = await _paymentService.CreatePaymentLinkResponse(paymentInfoRequestDTO);
 
-            var paymentRequest = new CreatePaymentLinkRequest
-            {
-                OrderCode = orderCode,
-                Amount = 2000,
-                Description = "Thanh toán đơn hàng",
-                CancelUrl = "https://payment-testing-fe.vercel.app/payment/cancel",
-                ReturnUrl = "https://payment-testing-fe.vercel.app/payment/success"
-            };
-
-            // Optional but useful
-            // request.Items = new List<Item> { new("Sản phẩm", 1, 100000) };
-
-            var response = await _payOSClient.PaymentRequests.CreateAsync(paymentRequest);
-
-            return Ok(new
-            {
-                checkoutUrl = response.CheckoutUrl,
-                paymentLinkId = response.PaymentLinkId,
-                orderCode = response.OrderCode
-            });
+            return Ok(ResponseDTO<PaymentResponseDTO>.Success(response, "Tạo link thanh toán thành công"));
         }
 
         [HttpPost("webhook")]
@@ -78,10 +60,5 @@ namespace STEMotion.Presentation.Controllers
             return Ok(result);
         }
 
-    }
-    public class CreatePaymentDto
-    {
-        public int Amount { get; set; }      // in VND, no decimals
-        public string? Description { get; set; }
     }
 }

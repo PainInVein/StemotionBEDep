@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STEMotion.Infrastructure.DBContext;
 
@@ -11,9 +12,11 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    partial class StemotionContextModelSnapshot : ModelSnapshot
+    [Migration("20260130091613_UpdateRelationShipPaymentSubscriptionPayment")]
+    partial class UpdateRelationShipPaymentSubscriptionPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -307,12 +310,13 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("account_number");
 
-                    b.Property<decimal?>("Amount")
+                    b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
 
                     b.Property<string>("Code")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("code");
@@ -338,11 +342,12 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnName("currency");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("description");
 
-                    b.Property<long?>("OrderCode")
+                    b.Property<long>("OrderCode")
                         .HasColumnType("bigint")
                         .HasColumnName("order_code");
 
@@ -364,11 +369,11 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("subscription_id");
 
-                    b.Property<bool?>("Success")
+                    b.Property<bool>("Success")
                         .HasColumnType("bit")
                         .HasColumnName("is_success");
 
-                    b.Property<DateTime?>("TransactionDateTime")
+                    b.Property<DateTime>("TransactionDateTime")
                         .HasColumnType("datetime2")
                         .HasColumnName("transaction_datetime");
 

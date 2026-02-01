@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PayOS.Models.V2.PaymentRequests;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Extensions;
@@ -59,6 +60,12 @@ namespace STEMotion.Application.Middleware
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now));
 
             CreateMap<Subscription, SubscriptionResponseDTO>().ReverseMap();
+
+            CreateMap<CreatePaymentLinkResponse, PaymentResponseDTO>()
+                .ForMember(dest => dest.CheckoutUrl, opt => opt.MapFrom(src => src.CheckoutUrl))
+                .ForMember(dest => dest.PaymentLinkId, opt => opt.MapFrom(src => src.PaymentLinkId))
+                .ForMember(dest => dest.OrderCode, opt => opt.MapFrom(src => src.OrderCode))
+                .ReverseMap();
         }
     }
 }
