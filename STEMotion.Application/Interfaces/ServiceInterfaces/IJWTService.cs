@@ -8,6 +8,6 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
 {
     public interface IJWTService
     {
-        string GenerateToken(string email, string role);
+        string GenerateToken(Guid userId,string email, string role);
     }
 }

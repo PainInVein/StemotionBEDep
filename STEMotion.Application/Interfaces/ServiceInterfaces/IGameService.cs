@@ -16,7 +16,6 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         Task<GameResponseDTO?> GetGameByIdAsync(Guid gameId);
         Task<IEnumerable<GameResponseDTO>> GetGameByLessonIdAsync(Guid lessionId);
         Task<IEnumerable<GameResponseDTO>> GetAllActiveGameAsync();
-        Task<PlayGameDTO> GetGameForPlayAsync(Guid gameId);
         Task<PaginatedResponseDTO<GameResponseDTO>> GetAllGames(PaginationRequestDTO requestDTO);
     }
 }

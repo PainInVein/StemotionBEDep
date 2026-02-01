@@ -36,7 +36,17 @@ namespace STEMotion.Presentation.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
             var result = await _userService.LoginUser(loginRequestDTO);
-            return Ok(ResponseDTO<string>.Success(result, "Đăng nhập thành công"));
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,  
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddHours(1)
+            };
+
+            Response.Cookies.Append("accessToken", result, cookieOptions);
+
+            return Ok(ResponseDTO<object>.Success(null, "Đăng nhập thành công"));
         }
 
         [HttpGet("google-login")]
@@ -80,7 +90,7 @@ namespace STEMotion.Presentation.Controllers
                 HttpOnly = true,
                 Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddHours(24)
+                Expires = DateTime.UtcNow.AddHours(1)
             };
 
             Response.Cookies.Append("accessToken", response, cookieOptions);

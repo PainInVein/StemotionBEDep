@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STEMotion.Infrastructure.DBContext;
 
@@ -11,9 +12,11 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    partial class StemotionContextModelSnapshot : ModelSnapshot
+    [Migration("20260131142037_ThanhDT_Add_Table_StudentProgress")]
+    partial class ThanhDT_Add_Table_StudentProgress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -26,6 +26,8 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
         IPaymentRepository PaymentRepository { get; }
 
         ISubscriptionRepository SubscriptionRepository { get; }
+
+        IStudentProgressRepository StudentProgressRepository { get; }
         Task<int> SaveChangesAsync();
     }
 }

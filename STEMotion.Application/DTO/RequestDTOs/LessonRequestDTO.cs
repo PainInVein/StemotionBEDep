@@ -9,8 +9,8 @@ namespace STEMotion.Application.DTO.RequestDTOs
 {
     public class LessonRequestDTO
     {
-        public string ChapterName { get; set; }
-        public string LessonName { get; set; }
+        public Guid ChapterId { get; set; }
+        public Guid LessonId { get; set; }
         //public int? EstimatedTime { get; set; }
     }
     public class UpdateLessonRequestDTO : LessonRequestDTO

@@ -27,19 +27,17 @@ namespace STEMotion.Application.Services
 
         public async Task<LessonResponseDTO> CreateLesson(LessonRequestDTO requestDTO)
         {
-            var chapter = await _unitOfWork.ChapterRepository
-            .FindByCondition(c => c.ChapterName.ToLower() == requestDTO.ChapterName.ToLower())
-            .FirstOrDefaultAsync();
+            var chapter = await _unitOfWork.ChapterRepository.GetByIdAsync(requestDTO.ChapterId);
 
             if (chapter == null)
             {
-                throw new NotFoundException("Chương", requestDTO.LessonName);
+                throw new NotFoundException("Chương không tồn tại");
             }
             var isDuplicate = await _unitOfWork.LessonRepository
-            .ExistsAsync(x => x.LessonName.ToLower() == requestDTO.LessonName.ToLower() && x.ChapterId == chapter.ChapterId);
+            .ExistsAsync(x => x.LessonId ==requestDTO.LessonId);
 
             if (isDuplicate)
-                throw new AlreadyExistsException("Bài học", requestDTO.LessonName);
+                throw new AlreadyExistsException("Bài học", requestDTO.LessonId.ToString());
             var lesson = _mapper.Map<Lesson>(requestDTO);
             lesson.Status = "Active";
             lesson.ChapterId = chapter.ChapterId;
