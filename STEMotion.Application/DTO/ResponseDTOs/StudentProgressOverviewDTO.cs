@@ -6,15 +6,17 @@ using System.Threading.Tasks;
 
 namespace STEMotion.Application.DTO.ResponseDTOs
 {
-    public class ChildProgressSummaryDTO
+    public class StudentProgressOverviewDTO
     {
         public Guid StudentId { get; set; }
         public string StudentName { get; set; }
         public int GradeLevel { get; set; }
-        public double OverallProgress { get; set; }
+        public int TotalSubjects { get; set; }
+        public int TotalChapters { get; set; }
         public int TotalLessons { get; set; }
         public int CompletedLessons { get; set; }
-        public DateTime? LastActivity { get; set; }
-        public List<SubjectSummaryDTO> TopSubjects { get; set; } // Top 3 môn học
+        public int OverallCompletionPercentage { get; set; }
+        public DateTime? LastActivityDate { get; set; }
+        public List<SubjectProgressResponseDTO> Subjects { get; set; }
     }
 }

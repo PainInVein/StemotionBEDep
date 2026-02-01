@@ -10,27 +10,27 @@ namespace STEMotion.Application.Services
 {
     public class StudentProgressService : IStudentProgressService
     {
-        public Task<ChapterProgressDTO> GetChapterProgressAsync(Guid parentId, Guid studentId, Guid chapterId)
+        public Task<ChapterProgressResponseDTO> GetChapterProgressAsync(Guid parentId, Guid studentId, Guid chapterId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<LessonProgressDTO> GetLessonProgressAsync(Guid parentId, Guid studentId, Guid lessonId)
+        public Task<LessonProgressResponseDTO> GetLessonProgressAsync(Guid parentId, Guid studentId, Guid lessonId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ParentDashboardDTO> GetParentDashboardAsync(Guid parentId)
+        public Task<ParentStudentListDTO> GetParentDashboardAsync(Guid parentId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<StudentOverallProgressResponseDTO> GetStudentOverallProgressAsync(Guid parentId, Guid studentId)
+        public Task<StudentProgressOverviewDTO> GetStudentOverallProgressAsync(Guid parentId, Guid studentId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<SubjectProgressDTO> GetSubjectProgressAsync(Guid parentId, Guid studentId, Guid subjectId)
+        public Task<SubjectProgressResponseDTO> GetSubjectProgressAsync(Guid parentId, Guid studentId, Guid subjectId)
         {
             throw new NotImplementedException();
         }

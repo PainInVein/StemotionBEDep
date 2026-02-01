@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace STEMotion.Application.DTO.ResponseDTOs
 {
-    public class ChapterProgressDTO
+    public class ChapterProgressResponseDTO
     {
         public Guid ChapterId { get; set; }
         public string ChapterName { get; set; }
         public double CompletionPercentage { get; set; } // % hoàn thành chương
         public int TotalLessons { get; set; }
         public int CompletedLessons { get; set; }
-        public List<LessonProgressDTO> LessonProgress { get; set; }
+        public List<LessonProgressResponseDTO> LessonProgress { get; set; }
     }
 }

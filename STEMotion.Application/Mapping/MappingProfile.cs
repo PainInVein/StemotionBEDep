@@ -49,6 +49,8 @@ namespace STEMotion.Application.Middleware
 
             CreateMap<Lesson, LessonResponseDTO>()
                 .ForMember(dest => dest.ChapterName, opt => opt.MapFrom(src => src.Chapter.ChapterName))
+                    .ForMember(dest => dest.GradeLevel,
+        opt => opt.MapFrom(src => src.Chapter.Subject.Grade.GradeLevel))
                 .ReverseMap();
 
             CreateMap<LessonRequestDTO, Lesson>().IgnoreAllNonExisting().ReverseMap();

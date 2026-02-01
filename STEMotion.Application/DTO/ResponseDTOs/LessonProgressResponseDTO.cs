@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace STEMotion.Application.DTO.ResponseDTOs
 {
-    public class LessonProgressDTO
+    public class LessonProgressResponseDTO
     {
         public Guid LessonId { get; set; }
         public string LessonName { get; set; }

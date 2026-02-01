@@ -33,11 +33,15 @@ namespace STEMotion.Application.Services
             {
                 throw new NotFoundException("Chương không tồn tại");
             }
-            var isDuplicate = await _unitOfWork.LessonRepository
-            .ExistsAsync(x => x.LessonId ==requestDTO.LessonId);
+            var isDuplicate = await _unitOfWork.LessonRepository.ExistsAsync(
+                x => x.LessonName == requestDTO.LessonName
+                  && x.Chapter.Subject.Grade.GradeLevel
+                     == chapter.Subject.Grade.GradeLevel
+            );
+
 
             if (isDuplicate)
-                throw new AlreadyExistsException("Bài học", requestDTO.LessonId.ToString());
+                throw new AlreadyExistsException("Bài học", requestDTO.LessonName);
             var lesson = _mapper.Map<Lesson>(requestDTO);
             lesson.Status = "Active";
             lesson.ChapterId = chapter.ChapterId;
