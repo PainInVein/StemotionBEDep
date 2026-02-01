@@ -8,11 +8,6 @@ using STEMotion.Application.Exceptions;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace STEMotion.Application.Services
 {
@@ -46,7 +41,7 @@ namespace STEMotion.Application.Services
                 Amount = paymentInfoRequestDTO.SubscriptionInfo.SubscriptionPrice,
                 Description = $"Gói {paymentInfoRequestDTO.SubscriptionInfo.BillingPeriod} - {paymentInfoRequestDTO.SubscriptionInfo.SubscriptionName}",
                 CancelUrl = _configuration["PayOSLinks:CancelUrl"]!,
-                ReturnUrl = _configuration["PayOSLinks:CancelUrl"]!
+                ReturnUrl = _configuration["PayOSLinks:SuccessUrl"]!
             };
 
             //Create payment in database
@@ -59,6 +54,7 @@ namespace STEMotion.Application.Services
 
             pendingPayment.SubscriptionPayment = new SubscriptionPayment
             {
+                OrderCode = orderCode,
                 SubscriptionId = paymentInfoRequestDTO.SubscriptionInfo.SubscriptionId,
                 Amount = paymentInfoRequestDTO.SubscriptionInfo.SubscriptionPrice
             };
@@ -66,7 +62,7 @@ namespace STEMotion.Application.Services
             //tao payment
             var request = await _unitOfWork.PaymentRepository.CreateAsync(pendingPayment);
 
-            if(request == null)
+            if (request == null)
             {
                 throw new InternalServerException("Không thể tạo payment");
             }

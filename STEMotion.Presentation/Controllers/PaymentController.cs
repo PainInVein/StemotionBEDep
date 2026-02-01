@@ -13,11 +13,10 @@ namespace STEMotion.Presentation.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
-        private readonly PayOSClient _payOSClient;
-        public PaymentController(IPaymentService paymentService, PayOSClient payOSClient)
+        //private readonly PayOSClient _payOSClient;
+        public PaymentController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
-            _payOSClient = payOSClient;
         }
 
         [EndpointDescription("API này check user mua gói chưa")]
@@ -37,28 +36,28 @@ namespace STEMotion.Presentation.Controllers
             return Ok(ResponseDTO<PaymentResponseDTO>.Success(response, "Tạo link thanh toán thành công"));
         }
 
-        [HttpPost("webhook")]
-        public async Task<IActionResult> HandleWebhook([FromBody] Webhook webhookData)
-        {
-            try
-            {
-                var verifiedData = await _payOSClient.Webhooks.VerifyAsync(webhookData);
-                Console.WriteLine($"Thanh toán thành công: {verifiedData.OrderCode}");
-                return Ok("OK");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Webhook không hợp lệ: {ex.Message}");
-                return BadRequest("Invalid webhook");
-            }
-        }
+        //[HttpPost("webhook")]
+        //public async Task<IActionResult> HandleWebhook([FromBody] Webhook webhookData)
+        //{
+        //    try
+        //    {
+        //        var verifiedData = await _payOSClient.Webhooks.VerifyAsync(webhookData);
+        //        Console.WriteLine($"Thanh toán thành công: {verifiedData.OrderCode}");
+        //        return Ok("OK");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Webhook không hợp lệ: {ex.Message}");
+        //        return BadRequest("Invalid webhook");
+        //    }
+        //}
 
-        [HttpPost("payment/{orderCode}/cancel")]
-        public async Task<IActionResult> Cancel(long orderCode)
-        {
-            var result = await _payOSClient.PaymentRequests.CancelAsync(orderCode);
-            return Ok(result);
-        }
+        //[HttpPost("payment/{orderCode}/cancel")]
+        //public async Task<IActionResult> Cancel(long orderCode)
+        //{
+        //    var result = await _payOSClient.PaymentRequests.CancelAsync(orderCode);
+        //    return Ok(result);
+        //}
 
     }
 }
