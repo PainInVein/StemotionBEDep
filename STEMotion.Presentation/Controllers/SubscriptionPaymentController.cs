@@ -34,24 +34,24 @@ namespace STEMotion.Presentation.Controllers
             }
         }
 
-        //[HttpGet("cancel-payment")]
-        //public async Task<IActionResult> HandlePaymentCancel([FromQuery] PaymentCancelRequestDTO paymentCancelRequestDTO)
-        //{
-        //    if (paymentCancelRequestDTO.OrderCode <= 0)
-        //    {
-        //        return BadRequest(ResponseDTO<string>.Fail("Fail", "Thiếu hoặc orderCode không hợp lệ"));
-        //    }
+        [HttpGet("cancel-payment")]
+        public async Task<IActionResult> HandlePaymentCancel([FromQuery] PaymentCancelRequestDTO paymentCancelRequestDTO)
+        {
+            if (paymentCancelRequestDTO.OrderCode <= 0)
+            {
+                return BadRequest(ResponseDTO<string>.Fail("Fail", "Thiếu hoặc orderCode không hợp lệ"));
+            }
 
-        //    var result = await _subscriptionPaymentService.UpdateCancelPaymentByOrderCode(paymentCancelRequestDTO);
+            var result = await _subscriptionPaymentService.UpdateCancelPaymentByOrderCode(paymentCancelRequestDTO);
 
-        //    if (string.IsNullOrEmpty(result))
-        //    {
-        //        return Ok(ResponseDTO<bool>.Success(true, "Hủy payment thành công"));
-        //    }
-        //    else
-        //    {
-        //        return BadRequest(ResponseDTO<string>.Fail("Hủy payment thất bại", result));
-        //    }
-        //}
+            if (string.IsNullOrEmpty(result))
+            {
+                return Ok(ResponseDTO<bool>.Success(true, "Hủy payment thành công"));
+            }
+            else
+            {
+                return BadRequest(ResponseDTO<string>.Fail("Hủy payment thất bại", result));
+            }
+        }
     }
 }
