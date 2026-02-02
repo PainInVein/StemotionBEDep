@@ -352,10 +352,10 @@ public partial class StemotionContext : DbContext
                   .HasConstraintName("FK_Payment_UserId")
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasMany(p => p.SubscriptionPayments)
-      .WithOne(sp => sp.Payment)
-      .HasForeignKey(sp => sp.PaymentId)
-      .OnDelete(DeleteBehavior.Restrict);
+      //      entity.HasOne(p => p.SubscriptionPayments)
+      //.WithOne(sp => sp.Payment)
+      //.HasForeignKey<SubscriptionPayment>(sp => sp.PaymentId)
+      //.OnDelete(DeleteBehavior.Restrict);
         });
 
 
@@ -426,56 +426,66 @@ public partial class StemotionContext : DbContext
 
             entity.Property(e => e.Code)
                 .HasColumnName("code")
-                .HasMaxLength(10);
+                .HasMaxLength(10)
+                .IsRequired(false);
+
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.Property(e => e.Success)
                 .HasColumnName("is_success")
-                .IsRequired();
+                .IsRequired(false);
 
             entity.Property(e => e.AccountNumber)
                 .HasColumnName("account_number")
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .IsRequired(false);
 
             entity.Property(e => e.Amount)
                 .HasColumnName("amount")
                 .HasPrecision(18, 2)
-                .IsRequired();
+                .IsRequired(false);
 
             entity.Property(e => e.Currency)
                 .HasColumnName("currency")
-                .HasMaxLength(10);
+                .HasMaxLength(10)
+                .IsRequired(false);
 
             entity.Property(e => e.OrderCode)
                 .HasColumnName("order_code")
-                .IsRequired();
+                .IsRequired(false);
 
             entity.Property(e => e.Reference)
                 .HasColumnName("reference")
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .IsRequired(false);
 
             entity.Property(e => e.PaymentLinkId)
                 .HasColumnName("payment_link_id")
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .IsRequired(false);
 
             entity.Property(e => e.TransactionDateTime)
                 .HasColumnName("transaction_datetime")
-                .IsRequired();
+                .IsRequired(false);
 
             entity.Property(e => e.CounterAccountBankId)
                 .HasColumnName("counter_account_bank_id")
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .IsRequired(false);
 
             entity.Property(e => e.CounterAccountName)
                 .HasColumnName("counter_account_name")
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.Property(e => e.CounterAccountNumber)
                 .HasColumnName("counter_account_number")
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .IsRequired(false);
 
             //// Foreign keys
             //entity.HasOne(sp => sp.Payment)
@@ -489,6 +499,12 @@ public partial class StemotionContext : DbContext
             //    .HasForeignKey(sp => sp.SubscriptionId)
             //    .HasConstraintName("FK_SubscriptionPayment_Subscription")
             //    .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(sp => sp.Payment)
+          .WithOne(p => p.SubscriptionPayment)
+          .HasForeignKey<SubscriptionPayment>(sp => sp.PaymentId)
+          .OnDelete(DeleteBehavior.Restrict);
+
         });
 
         modelBuilder.Entity<Game>(entity =>

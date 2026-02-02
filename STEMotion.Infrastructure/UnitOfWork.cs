@@ -55,6 +55,9 @@ namespace STEMotion.Infrastructure
         public ISubscriptionRepository _subscriptionRepository;
         public ISubscriptionRepository SubscriptionRepository => _subscriptionRepository ??= new SubscriptionRepository(_context);
 
+        public ISubscriptionPaymentRepository _subscriptionPaymentRepository;
+        public ISubscriptionPaymentRepository SubscriptionPaymentRepository => _subscriptionPaymentRepository ??= new SubscriptionPaymentRepository(_context);
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)
