@@ -2,6 +2,7 @@
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
+using STEMotion.Application.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -35,7 +36,7 @@ namespace STEMotion.Presentation.Controllers
         }
 
         [EndpointDescription("API này để tạo Lesson")]
-        [HttpPost]
+        [HttpPost]  
         public async Task<IActionResult> CreateLesson([FromBody] LessonRequestDTO createLessonRequest)
         {
             var result = await _lessonService.CreateLesson(createLessonRequest);
@@ -56,6 +57,13 @@ namespace STEMotion.Presentation.Controllers
         {
             var result = await _lessonService.DeleteLesson(id);
             return Ok(ResponseDTO<bool>.Success(result, "Xóa bài học thành công"));
+        }
+
+        [HttpGet("/get-by-lesson/{chapterName}")]
+        public async Task<IActionResult> GetSubjectByGrade([FromQuery] PaginationRequestDTO requestDTO, string chapterName)
+        {
+            var result = await _lessonService.GetSubjectByChapterName(requestDTO, chapterName);
+            return Ok(ResponseDTO<PaginatedResponseDTO<LessonResponseDTO>>.Success(result, "Tìm thấy  thành công"));
         }
     }
 }

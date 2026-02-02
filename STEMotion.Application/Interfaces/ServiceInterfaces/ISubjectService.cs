@@ -17,5 +17,6 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         Task<SubjectResponseDTO> CreateSubject(SubjectRequestDTO requestDTO);
         Task<SubjectResponseDTO> UpdateSubject(Guid id, UpdateSubjectRequestDTO requestDTO);
         Task<bool> DeleteSubject(Guid id);
+        Task<PaginatedResponseDTO<SubjectResponseDTO>> GetSubjectByGradeLevel(PaginationRequestDTO requestDTO,int gradeLevel);
     }
 }

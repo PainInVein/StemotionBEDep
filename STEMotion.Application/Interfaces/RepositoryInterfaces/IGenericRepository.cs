@@ -18,6 +18,6 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
 
         IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false);
-        Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null);
+        Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null, params Expression<Func<T, object>>[] includes);
     }
 }

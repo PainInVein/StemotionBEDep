@@ -15,5 +15,6 @@ namespace STEMotion.Domain.Entities
         public string Status { get; set; }
 
         public virtual Chapter Chapter { get; set; }
+        public virtual ICollection<LessonContent> LessonContents { get; set; }
     }
 }
