@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using PayOS.Models.V2.PaymentRequests;
+using PayOS.Models.Webhooks;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
 using STEMotion.Application.Extensions;
@@ -62,6 +64,18 @@ namespace STEMotion.Application.Middleware
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now));
 
             CreateMap<Subscription, SubscriptionResponseDTO>().ReverseMap();
+
+            CreateMap<CreatePaymentLinkResponse, PaymentResponseDTO>()
+                .ForMember(dest => dest.CheckoutUrl, opt => opt.MapFrom(src => src.CheckoutUrl))
+                .ForMember(dest => dest.PaymentLinkId, opt => opt.MapFrom(src => src.PaymentLinkId))
+                .ForMember(dest => dest.OrderCode, opt => opt.MapFrom(src => src.OrderCode))
+                .ReverseMap();
+
+            CreateMap<WebhookData, SubscriptionPayment>()
+            .ForMember(dest => dest.CounterAccountBankId, opt => opt.MapFrom(src => src.CounterAccountBankId))
+            .ForMember(dest => dest.CounterAccountName, opt => opt.MapFrom(src => src.CounterAccountName))
+            .ForMember(dest => dest.CounterAccountNumber, opt => opt.MapFrom(src => src.CounterAccountNumber));
+
             CreateMap<LessonContent, LessonContentResponseDTO>();
 
             CreateMap<CreateLessonContentRequestDTO, LessonContent>()

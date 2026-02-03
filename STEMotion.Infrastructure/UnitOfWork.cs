@@ -57,6 +57,8 @@ namespace STEMotion.Infrastructure
 
         public IStudentProgressRepository _progressRepository;
         public IStudentProgressRepository StudentProgressRepository => _progressRepository ??= new StudentProgressRepository(_context);
+        public ISubscriptionPaymentRepository _subscriptionPaymentRepository;
+        public ISubscriptionPaymentRepository SubscriptionPaymentRepository => _subscriptionPaymentRepository ??= new SubscriptionPaymentRepository(_context);
 
         protected virtual void Dispose(bool disposing)
         {
