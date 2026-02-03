@@ -19,7 +19,7 @@ namespace STEMotion.Application.Services
         {
             _configuration = configuration;
         }
-        public string GenerateToken(string email, string role)
+        public string GenerateToken(Guid userId, string email, string role)
         {
             var jwtKey = _configuration["JWT:Key"];
             var issuer = _configuration["Jwt:Issuer"];
@@ -29,9 +29,10 @@ namespace STEMotion.Application.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-    
+
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()), 
                 new Claim(JwtRegisteredClaimNames.Email, email),
                 new Claim("Role", role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())

@@ -51,13 +51,12 @@ namespace STEMotion.Application.Services
         {
             var lesson = await _unitOfWork.LessonRepository
                 .FindByCondition(l =>
-                    l.LessonName.ToLower() == request.LessonName.ToLower() &&
-                    l.Chapter.ChapterName.ToLower() == request.ChapterName.ToLower() &&
+                    l.LessonId == request.LessonId &&
                     l.Status == "Active")
                 .FirstOrDefaultAsync();
 
             if (lesson == null)
-                throw new NotFoundException($"Không tìm thấy bài học '{request.LessonName}' trong chương '{request.ChapterName}'.");
+                throw new NotFoundException($"Không tìm thấy bài học.");
 
             var content = _mapper.Map<LessonContent>(request);
             content.LessonId = lesson.LessonId;
