@@ -119,6 +119,11 @@ namespace STEMotion.Application.Middleware
                 .ForMember(dest => dest.BestCorrectAnswers, opt => opt.MapFrom(src => src.CorrectAnswers))
                 .ForMember(dest => dest.LastPlayedAt, opt => opt.MapFrom(src => src.PlayedAt))
                 .ForMember(dest => dest.AttemptCount, opt => opt.Ignore());
+
+            // StudentProgress mappings
+            CreateMap<StudentProgress, LessonProgressResponseDTO>()
+                .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName))
+                .ForMember(dest => dest.EstimatedTime, opt => opt.MapFrom(src => src.Lesson.EstimatedTime));
         }
     }
 }

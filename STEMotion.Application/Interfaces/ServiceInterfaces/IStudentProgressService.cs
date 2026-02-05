@@ -1,8 +1,6 @@
 ﻿using STEMotion.Application.DTO.ResponseDTOs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace STEMotion.Application.Interfaces.ServiceInterfaces
@@ -10,45 +8,59 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
     public interface IStudentProgressService
     {
         /// <summary>
-        /// Lấy dashboard tổng quan cho phụ huynh với tất cả con
+        /// Lấy tổng quan tiến độ học tập của học sinh
         /// </summary>
-        /// <param name="parentId">ID của phụ huynh</param>
-        /// <returns>Dashboard với thông tin tổng quan của tất cả con</returns>
-        Task<ParentStudentListDTO> GetParentDashboardAsync(Guid parentId);
-
-        /// <summary>
-        /// Lấy tổng quan tiến trình học chi tiết của một học sinh
-        /// </summary>
-        /// <param name="parentId">ID của phụ huynh</param>
         /// <param name="studentId">ID của học sinh</param>
-        /// <returns>Tổng quan tiến trình học với chi tiết từng môn</returns>
-        Task<StudentProgressOverviewDTO> GetStudentOverallProgressAsync(Guid parentId, Guid studentId);
+        /// <returns>Thông tin tổng quan tiến độ</returns>
+        Task<StudentProgressOverviewDTO> GetStudentProgressOverviewAsync(Guid studentId);
 
         /// <summary>
-        /// Lấy tiến trình học theo môn học
+        /// Lấy tiến độ học tập của học sinh theo môn học
         /// </summary>
-        /// <param name="parentId">ID của phụ huynh</param>
         /// <param name="studentId">ID của học sinh</param>
         /// <param name="subjectId">ID của môn học</param>
-        /// <returns>Chi tiết tiến trình môn học với danh sách chapter</returns>
-        Task<SubjectProgressResponseDTO> GetSubjectProgressAsync(Guid parentId, Guid studentId, Guid subjectId);
+        /// <returns>Thông tin tiến độ theo môn học</returns>
+        Task<SubjectProgressResponseDTO> GetProgressBySubjectAsync(Guid studentId, Guid subjectId);
 
         /// <summary>
-        /// Lấy tiến trình học theo chương
+        /// Lấy tiến độ học tập của học sinh theo chương
         /// </summary>
-        /// <param name="parentId">ID của phụ huynh</param>
         /// <param name="studentId">ID của học sinh</param>
         /// <param name="chapterId">ID của chương</param>
-        /// <returns>Chi tiết tiến trình chương với danh sách lesson</returns>
-        Task<ChapterProgressResponseDTO> GetChapterProgressAsync(Guid parentId, Guid studentId, Guid chapterId);
+        /// <returns>Thông tin tiến độ theo chương</returns>
+        Task<ChapterProgressResponseDTO> GetProgressByChapterAsync(Guid studentId, Guid chapterId);
 
         /// <summary>
-        /// Lấy tiến trình học theo bài học
+        /// Lấy danh sách học sinh của phụ huynh với tiến độ tổng quan
         /// </summary>
         /// <param name="parentId">ID của phụ huynh</param>
+        /// <returns>Danh sách học sinh kèm tiến độ tổng quan</returns>
+        Task<IEnumerable<ParentStudentListDTO>> GetParentStudentListAsync(Guid parentId);
+
+        /// <summary>
+        /// Cập nhật tiến độ học tập của học sinh cho một bài học
+        /// </summary>
         /// <param name="studentId">ID của học sinh</param>
         /// <param name="lessonId">ID của bài học</param>
-        /// <returns>Chi tiết tiến trình của bài học</returns>
-        Task<LessonProgressResponseDTO> GetLessonProgressAsync(Guid parentId, Guid studentId, Guid lessonId);
+        /// <param name="completionPercentage">Phần trăm hoàn thành</param>
+        /// <param name="isCompleted">Đã hoàn thành hay chưa</param>
+        /// <returns>Thông tin tiến độ đã cập nhật</returns>
+        Task<LessonProgressResponseDTO> UpdateLessonProgressAsync(Guid studentId, Guid lessonId, int completionPercentage, bool isCompleted);
+
+        /// <summary>
+        /// Bắt đầu một bài học (ghi nhận thời gian bắt đầu)
+        /// </summary>
+        /// <param name="studentId">ID của học sinh</param>
+        /// <param name="lessonId">ID của bài học</param>
+        /// <returns>Thông tin tiến độ bài học</returns>
+        Task<LessonProgressResponseDTO> StartLessonAsync(Guid studentId, Guid lessonId);
+
+        /// <summary>
+        /// Lấy tiến độ của một bài học cụ thể
+        /// </summary>
+        /// <param name="studentId">ID của học sinh</param>
+        /// <param name="lessonId">ID của bài học</param>
+        /// <returns>Thông tin tiến độ bài học</returns>
+        Task<LessonProgressResponseDTO> GetLessonProgressAsync(Guid studentId, Guid lessonId);
     }
 }
