@@ -868,7 +868,8 @@ namespace STEMotion.Infrastructure.Migrations
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
-                    b.Navigation("SubscriptionPayments");
+                    b.Navigation("SubscriptionPayment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
@@ -891,41 +892,7 @@ namespace STEMotion.Infrastructure.Migrations
 
                     b.Navigation("StudentRelations");
                 });
-            modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
-                {
-                    b.Navigation("SubscriptionPayment")
-                        .IsRequired();
-                    b.Navigation("SubscriptionPayments");
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Game", b =>
-                        {
-                            b.Navigation("GameResults");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Lesson", b =>
-                        {
-                            b.Navigation("LessonContents");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
-                        {
-                            b.Navigation("Chapters");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Subscription", b =>
-                        {
-                            b.Navigation("SubscriptionPayments");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.User", b =>
-                        {
-                            b.Navigation("ParentRelations");
-
-                            b.Navigation("Payments");
-
-                            b.Navigation("StudentRelations");
-                        });
 #pragma warning restore 612, 618
-                });
-    }
+        }
     }
 }
