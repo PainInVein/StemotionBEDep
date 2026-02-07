@@ -2,7 +2,9 @@
 using PayOS.Models.V2.PaymentRequests;
 using PayOS.Models.Webhooks;
 using STEMotion.Application.DTO.RequestDTOs;
+using STEMotion.Application.DTO.RequestDTOs.StudentReqDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
+using STEMotion.Application.DTO.ResponseDTOs.StudentResponseDTO;
 using STEMotion.Application.Extensions;
 using STEMotion.Domain.Entities;
 
@@ -138,6 +140,11 @@ namespace STEMotion.Application.Middleware
             CreateMap<StudentProgress, LessonProgressResponseDTO>()
                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName))
                 .ForMember(dest => dest.EstimatedTime, opt => opt.MapFrom(src => src.Lesson.EstimatedTime));
+
+            //Student mappings
+            CreateMap<AddChildrenRequestDTO, Student>();
+            CreateMap<Student, AddChildrenResponseDTO>();
+                
         }
     }
 }
