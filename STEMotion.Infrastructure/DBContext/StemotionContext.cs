@@ -375,49 +375,7 @@ public partial class StemotionContext : DbContext
 
 
 
-        //Subscription Entity Configuration
-        modelBuilder.Entity<Subscription>(entity =>
-        {
-            entity.ToTable("Subscription");
 
-            entity.HasKey(e => e.SubscriptionId);
-
-            entity.Property(e => e.SubscriptionId)
-                .HasColumnName("subscription_id")
-                .HasDefaultValueSql("NEWID()")
-                .IsRequired();
-
-            entity.Property(e => e.SubscriptionName)
-                .HasColumnName("subscription_name")
-                .HasMaxLength(255)
-                .IsRequired();
-
-            entity.Property(e => e.Description)
-                .HasColumnName("description");
-
-            entity.Property(e => e.SubscriptionPrice)
-                .HasColumnName("subscription_price")
-                .HasPrecision(18, 2)
-                .IsRequired();
-
-            entity.Property(e => e.BillingPeriod)
-                .HasColumnName("billing_period")
-                .HasMaxLength(50)
-                .IsRequired();
-
-            entity.Property(e => e.IsActive)
-                .HasColumnName("is_active")
-                .HasDefaultValue(true);
-
-            entity.Property(e => e.CreatedAt)
-                .HasColumnName("created_at")
-                .HasDefaultValueSql("GETDATE()");
-
-            entity.HasMany(s => s.SubscriptionPayments)
-      .WithOne(sp => sp.Subscription)
-      .HasForeignKey(sp => sp.SubscriptionId)
-      .OnDelete(DeleteBehavior.Restrict);
-        });
 
         // SubscriptionPayment Entity Configuration
         modelBuilder.Entity<SubscriptionPayment>(entity =>
@@ -638,7 +596,6 @@ public partial class StemotionContext : DbContext
         });
 
 
-
         //Subscription Entity Configuration
         modelBuilder.Entity<Subscription>(entity =>
         {
@@ -676,6 +633,11 @@ public partial class StemotionContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("GETDATE()");
+
+            entity.HasMany(s => s.SubscriptionPayments)
+      .WithOne(sp => sp.Subscription)
+      .HasForeignKey(sp => sp.SubscriptionId)
+      .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<StudentProgress>(entity =>
