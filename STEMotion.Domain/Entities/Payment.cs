@@ -22,7 +22,7 @@ namespace STEMotion.Domain.Entities
 
         public virtual User User { get; set; }
 
-        public virtual ICollection<SubscriptionPayment> SubscriptionPayments { get; set; } = new List<SubscriptionPayment>();
+        public virtual SubscriptionPayment SubscriptionPayment { get; set; }
 
     }
 }

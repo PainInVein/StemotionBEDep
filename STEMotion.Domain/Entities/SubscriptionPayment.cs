@@ -15,20 +15,20 @@ namespace STEMotion.Domain.Entities
         public Guid SubscriptionId { get; set; }
 
         // PayOS / Bank result
-        public string Code { get; set; } = null!;             
-        public string Description { get; set; } = null!;       // "success"
-        public bool Success { get; set; }
+        public string? Code { get; set; }             
+        public string? Description { get; set; }     // "success"
+        public bool? Success { get; set; }
 
         // Transaction info
         public string? AccountNumber { get; set; }
-        public decimal Amount { get; set; }
+        public decimal? Amount { get; set; }
         public string? Currency { get; set; }                 
 
-        public long OrderCode { get; set; }                     
+        public long? OrderCode { get; set; }                     
         public string? Reference { get; set; }                 
         public string? PaymentLinkId { get; set; }
 
-        public DateTime TransactionDateTime { get; set; }
+        public DateTime? TransactionDateTime { get; set; }
 
         // Counter account (bank)
         public string? CounterAccountBankId { get; set; }
