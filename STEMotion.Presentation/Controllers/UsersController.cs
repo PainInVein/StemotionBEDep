@@ -50,31 +50,22 @@ namespace STEMotion.Application.Controllers
             return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Tạo người dùng thành công"));
         }
 
-        //[EndpointDescription("API này cập nhật User theo Id")]
-        //// PUT api/<UsersController>/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequestDTO updateUserRequestDTO)
-        //{
-        //    var result = await _userService.UpdateUser(id, updateUserRequestDTO);
-        //    return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Cập nhật người dùng thành công"));
-        //}
+        [EndpointDescription("API này cập nhật User theo Id")]
+        // PUT api/<UsersController>/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequestDTO updateUserRequestDTO)
+        {
+            var result = await _userService.UpdateUser(id, updateUserRequestDTO);
+            return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Cập nhật người dùng thành công"));
+        }
 
-        //[EndpointDescription("API này xóa User theo Id")]
-        //// DELETE api/<UsersController>/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUser(Guid id)
-        //{
-        //    var result = await _userService.DeleteUser(id);
-        //    return Ok(ResponseDTO<bool>.Success(result, "Xóa người dùng thành công"));
-        //}
-
-        //[EndpointDescription("API này tạo account con")]
-        //// POST api/<UsersController>
-        //[HttpPost]
-        //public async Task<IActionResult> CreateStudentAccount([FromBody] CreateStudentAccRequestDTO createStudentAccRequestDTO)
-        //{
-        //    var result = await _userService.CreateUser(createUserRequestDTO);
-        //    return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Tạo người dùng thành công"));
-        //}
+        [EndpointDescription("API này xóa User theo Id")]
+        // DELETE api/<UsersController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            var result = await _userService.DeleteUser(id);
+            return Ok(ResponseDTO<bool>.Success(result, "Xóa người dùng thành công"));
+        }
     }
 }
