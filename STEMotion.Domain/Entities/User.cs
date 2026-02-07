@@ -27,6 +27,8 @@ namespace STEMotion.Domain.Entities
 
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
+        public virtual ICollection<Student> Students { get; set; } = new List<Student>();
+
         public virtual ICollection<StudentProgress> StudentProgress { get; set; }
     }
 }

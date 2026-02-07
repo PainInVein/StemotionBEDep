@@ -32,6 +32,8 @@ public partial class StemotionContext : DbContext
 
     public DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
 
+    public DbSet<Student> Students { get; set; }
+
     public DbSet<Game> Games { get; set; }
     public DbSet<GameResult> GameResults { get; set; }
     public DbSet<StudentProgress> StudentProgress { get; set; }
@@ -696,6 +698,66 @@ public partial class StemotionContext : DbContext
                 .HasDatabaseName("IX_StudentProgress_Student_Lesson");
         });
 
+
+        //student table
+        modelBuilder.Entity<Student>(entity =>
+        {
+            entity.ToTable("Student");
+
+            entity.HasKey(e => e.StudentId);
+
+            entity.Property(e => e.StudentId)
+                .HasColumnName("student_id")
+                .HasDefaultValueSql("NEWID()")
+                .IsRequired();
+
+            entity.Property(e => e.ParentId)
+                .HasColumnName("parent_id")
+                .IsRequired();
+
+            entity.Property(e => e.Username)
+                .HasColumnName("username")
+                .HasMaxLength(100);
+
+            entity.HasIndex(e => e.Username)
+                .IsUnique()
+                .HasDatabaseName("IX_Student_Username");  
+
+            entity.Property(e => e.Password)
+                .HasColumnName("password")
+                .HasMaxLength(255);
+
+            entity.Property(e => e.FirstName)
+                .HasColumnName("first_name")
+                .HasMaxLength(255);
+
+            entity.Property(e => e.LastName)
+                .HasColumnName("last_name")
+                .HasMaxLength(255);
+
+            entity.Property(e => e.AvatarUrl)
+                .HasColumnName("avatar_url")
+                .HasMaxLength(500);
+
+            entity.Property(e => e.GradeLevel)
+                .HasColumnName("grade_level");
+
+            entity.Property(e => e.Status)
+                .HasColumnName("status")
+                .HasMaxLength(50)
+                .HasDefaultValue("Active");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("GETDATE()");
+
+            // Relationship to Parent (User)
+            entity.HasOne(s => s.Parent)
+                  .WithMany(u => u.Students)
+                  .HasForeignKey(s => s.ParentId)
+                  .HasConstraintName("FK_Student_parent_id") 
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
 
     }
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
