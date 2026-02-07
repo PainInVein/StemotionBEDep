@@ -13,6 +13,7 @@ namespace STEMotion.Domain.Entities
         public string LessonName { get; set; }
         public int? EstimatedTime { get; set; }
         public string Status { get; set; }
+        public int OrderIndex { get; set; }
 
         public virtual Chapter Chapter { get; set; }
         public virtual ICollection<LessonContent> LessonContents { get; set; }

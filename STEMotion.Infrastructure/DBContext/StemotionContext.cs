@@ -186,6 +186,13 @@ public partial class StemotionContext : DbContext
 
             entity.Property(e => e.Description)
                 .HasColumnName("description");
+
+            entity.Property(e => e.OrderIndex)
+     .HasColumnName("order_index")  // ✅ Map column name
+     .IsRequired();
+
+            entity.HasIndex(e => e.OrderIndex)  // ✅ Tạo index
+                .HasDatabaseName("IX_Grade_OrderIndex");
         });
 
         modelBuilder.Entity<Subject>(entity =>
@@ -213,6 +220,8 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(s => s.GradeId)
                 .HasConstraintName("FK_Subject.grade_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.OrderIndex).IsRequired();
         });
 
         modelBuilder.Entity<Chapter>(entity =>
@@ -237,6 +246,8 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(c => c.SubjectId)
                 .HasConstraintName("FK_Chapter.subject_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.OrderIndex).IsRequired();
         });
 
         modelBuilder.Entity<Lesson>(entity =>
@@ -264,6 +275,9 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(l => l.ChapterId)
                 .HasConstraintName("FK_Lesson.chapter_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.OrderIndex).IsRequired();
+
         });
         modelBuilder.Entity<LessonContent>(entity =>
         {

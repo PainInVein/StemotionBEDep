@@ -13,7 +13,7 @@ namespace STEMotion.Domain.Entities
         public int GradeLevel { get; set; }
         public string Name { get; set; }
         public string Status { get; set; }
-
+        public int OrderIndex { get; set; }
         public string Description { get; set; }
 
     }

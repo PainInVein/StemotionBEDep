@@ -143,6 +143,14 @@ namespace STEMotion.Infrastructure.Repositories
                     query = query.Include(include);
                 }
             }
+
+            // Check if T has a property named "OrderIndex"
+            var orderIndexProperty = typeof(T).GetProperty("OrderIndex");
+            if (orderIndexProperty != null && orderIndexProperty.PropertyType == typeof(int))
+            {
+                query = query.OrderBy(x => EF.Property<int>(x, "OrderIndex"));
+            }
+
             int totalCount = await query.CountAsync();
 
             var items = await query
