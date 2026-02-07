@@ -27,16 +27,18 @@ namespace STEMotion.Application.Services
 
         public async Task<LessonResponseDTO> CreateLesson(LessonRequestDTO requestDTO)
         {
-            var chapter = await _unitOfWork.ChapterRepository
-            .FindByCondition(c => c.ChapterName.ToLower() == requestDTO.ChapterName.ToLower())
-            .FirstOrDefaultAsync();
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterWithSubjectAndGradeAsync(requestDTO.ChapterId);
 
             if (chapter == null)
             {
-                throw new NotFoundException("Chương", requestDTO.LessonName);
+                throw new NotFoundException("Chương không tồn tại");
             }
-            var isDuplicate = await _unitOfWork.LessonRepository
-            .ExistsAsync(x => x.LessonName.ToLower() == requestDTO.LessonName.ToLower() && x.ChapterId == chapter.ChapterId);
+            var isDuplicate = await _unitOfWork.LessonRepository.ExistsAsync(x =>
+                x.LessonName == requestDTO.LessonName &&
+                x.ChapterId == requestDTO.ChapterId
+            );
+
+
 
             if (isDuplicate)
                 throw new AlreadyExistsException("Bài học", requestDTO.LessonName);
@@ -51,6 +53,7 @@ namespace STEMotion.Application.Services
             }
             var response = _mapper.Map<LessonResponseDTO>(request);
             response.ChapterName = chapter.ChapterName;
+            response.GradeLevel = chapter.Subject.Grade.GradeLevel;
             return response;
         }
 
@@ -68,7 +71,7 @@ namespace STEMotion.Application.Services
 
         public async Task<PaginatedResponseDTO<LessonResponseDTO>> GetAllLesson(PaginationRequestDTO requestDTO)
         {
-            var (lesson, total) = await _unitOfWork.LessonRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, null, x => x.Chapter);
+            var (lesson, total) = await _unitOfWork.LessonRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, null, x => x.Chapter, x => x.Chapter.Subject, x => x.Chapter.Subject.Grade);
             var response = _mapper.Map<IEnumerable<LessonResponseDTO>>(lesson);
             return new PaginatedResponseDTO<LessonResponseDTO>
             {
@@ -81,7 +84,10 @@ namespace STEMotion.Application.Services
 
         public async Task<LessonResponseDTO> GetLessonById(Guid id)
         {
-            var result = await _unitOfWork.LessonRepository.FindByCondition(x => x.LessonId == id, false).Include(x => x.Chapter).FirstOrDefaultAsync();
+            var result = await _unitOfWork.LessonRepository.FindByCondition(x => x.LessonId == id, false).Include(x => x.Chapter)
+            .ThenInclude(c => c.Subject)
+            .ThenInclude(s => s.Grade)
+            .FirstOrDefaultAsync();
             if (result == null)
             {
                 throw new NotFoundException("Bài học này không tồn tại");
@@ -92,7 +98,8 @@ namespace STEMotion.Application.Services
 
         public async Task<PaginatedResponseDTO<LessonResponseDTO>> GetSubjectByChapterName(PaginationRequestDTO requestDTO, string chapterName)
         {
-            var (lesson, total) = await _unitOfWork.LessonRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, x => x.Chapter.ChapterName == chapterName, x => x.Chapter);
+            var (lesson, total) = await _unitOfWork.LessonRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, x => x.Chapter.ChapterName == chapterName, x => x.Chapter, x => x.Chapter.Subject,
+        x => x.Chapter.Subject.Grade);
             var response = _mapper.Map<IEnumerable<LessonResponseDTO>>(lesson);
             return new PaginatedResponseDTO<LessonResponseDTO>
             {

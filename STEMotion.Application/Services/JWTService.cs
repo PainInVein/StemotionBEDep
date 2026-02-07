@@ -19,7 +19,7 @@ namespace STEMotion.Application.Services
         {
             _configuration = configuration;
         }
-        public string GenerateToken(string email, string role)
+        public string GenerateToken(Guid userId, string email, string role)
         {
             var jwtKey = _configuration["JWT:Key"];
             var issuer = _configuration["Jwt:Issuer"];
@@ -29,9 +29,10 @@ namespace STEMotion.Application.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-    
+
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()), 
                 new Claim(JwtRegisteredClaimNames.Email, email),
                 new Claim("Role", role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -46,6 +47,25 @@ namespace STEMotion.Application.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public ClaimsPrincipal ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,        
+                ValidateLifetime = true,         
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidAudience = _configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
+                )
+            };
+
+            var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+            return principal;
         }
     }
 }

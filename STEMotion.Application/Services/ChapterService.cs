@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Microsoft.EntityFrameworkCore;
 using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.ResponseDTOs;
@@ -29,7 +30,7 @@ namespace STEMotion.Application.Services
         #region CRUD
         public async Task<PaginatedResponseDTO<ChapterResponseDTO>> GetAllChapter(PaginationRequestDTO requestDTO)
         {
-            var (chapters, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber,requestDTO.PageSize, null, x => x.Subject);
+            var (chapters, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber,requestDTO.PageSize, null, x => x.Subject, x => x.Subject.Grade);
             var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapters);
             return new PaginatedResponseDTO<ChapterResponseDTO>
             {
@@ -53,7 +54,7 @@ namespace STEMotion.Application.Services
             {
                 throw new NotFoundException($"{requestDTO.SubjectName}", requestDTO.GradeLevel);
             }
-            var existingChapter = await _unitOfWork.ChapterRepository.ExistsAsync(x => x.ChapterName.ToLower().Equals(requestDTO.ChapterName.ToLower()));
+            var existingChapter = await _unitOfWork.ChapterRepository.ExistsAsync(x => x.ChapterName.ToLower().Equals(requestDTO.ChapterName.ToLower()) && x.SubjectId == subject.SubjectId);
             if (existingChapter)
             {
                 throw new AlreadyExistsException("Chương", $"{requestDTO.ChapterName}");
@@ -68,6 +69,8 @@ namespace STEMotion.Application.Services
                 throw new InternalServerException("Không thể tạo chương");
             }
             var response = _mapper.Map<ChapterResponseDTO>(request);
+            response.SubjectName = requestDTO.SubjectName;
+            response.GradeLevel = requestDTO.GradeLevel;
             return response;
 
         }
@@ -79,6 +82,7 @@ namespace STEMotion.Application.Services
                 throw new NotFoundException("Chương không tồn tại");
             }
             var response = _mapper.Map<ChapterResponseDTO>(chapter);
+            response.GradeLevel = chapter.Subject.Grade.GradeLevel;
             return response;
         }
         public async Task<ChapterResponseDTO> UpdateChapter(Guid id, UpdateChapterRequestDTO requestDTO)
@@ -106,6 +110,7 @@ namespace STEMotion.Application.Services
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.SaveChangesAsync();
             var response = _mapper.Map<ChapterResponseDTO>(chapter);
+            response.GradeLevel = requestDTO.GradeLevel;
             return response;
         }
         public async Task<bool> DeleteChapter(Guid id)
@@ -122,7 +127,7 @@ namespace STEMotion.Application.Services
 
         public async Task<PaginatedResponseDTO<ChapterResponseDTO>> GetChapterBySubjectName(PaginationRequestDTO requestDTO, string subjectName)
         {
-            var (chapter, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, x => x.Subject.SubjectName == subjectName, x => x.Subject);
+            var (chapter, total) = await _unitOfWork.ChapterRepository.GetPagedAsync(requestDTO.PageNumber, requestDTO.PageSize, x => x.Subject.SubjectName == subjectName, x => x.Subject, x => x.Subject.Grade);
             var response = _mapper.Map<IEnumerable<ChapterResponseDTO>>(chapter);
             return new PaginatedResponseDTO<ChapterResponseDTO>
             {

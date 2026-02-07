@@ -30,6 +30,7 @@ namespace STEMotion.Application.Services
         public async Task<GameResponseDTO> CreateGameAsync(CreateGameDTO requestDto)
         {
             var existGameCode = await _unitOfWork.GameRepository.GameCodeExistsAsync(requestDto.GameCode);
+            if(existGameCode)
             {
                 throw new NotFoundException($"Game code {requestDto.GameCode} đã tồn tại");
             }
@@ -112,25 +113,6 @@ namespace STEMotion.Application.Services
             var result = _mapper.Map<IEnumerable<GameResponseDTO>>(games);
             return result;
         }
-
-        public async Task<PlayGameDTO> GetGameForPlayAsync(Guid gameId)
-        {
-            var game = await _unitOfWork.GameRepository.GetByIdAsync(gameId);
-            if (game == null)
-            {
-                throw new NotFoundException("Không tìm thấy game");
-            }
-            if (!game.Status)
-            {
-                throw new InvalidCastException("Game này hiện không khả dụng");
-            }
-
-            var playDTO = _mapper.Map<PlayGameDTO>(game);
-            playDTO.Questions = new List<QuestionDTO>();
-
-            return playDTO;
-        }
-
         public async Task<GameResponseDTO> UpdateGameAsync(Guid gameId, UpdateGameDto dto)
         {
             var game = await _unitOfWork.GameRepository.GetByIdAsync(gameId);

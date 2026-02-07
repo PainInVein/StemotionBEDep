@@ -20,5 +20,13 @@ namespace STEMotion.Infrastructure.Repositories
         {
             return await FindAll(false).Include(x => x.Subject).ToListAsync();
         }
+        public async Task<Chapter?> GetChapterWithSubjectAndGradeAsync(Guid chapterId)
+        {
+            return await FindByCondition(x => x.ChapterId == chapterId, false)
+        .Include(x => x.Subject)
+        .ThenInclude(s => s.Grade)
+        .FirstOrDefaultAsync();
+
+        }
     }
 }

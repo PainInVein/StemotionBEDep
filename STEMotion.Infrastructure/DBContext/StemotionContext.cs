@@ -33,6 +33,7 @@ public partial class StemotionContext : DbContext
 
     public DbSet<Game> Games { get; set; }
     public DbSet<GameResult> GameResults { get; set; }
+    public DbSet<StudentProgress> StudentProgress { get; set; }
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -161,6 +162,13 @@ public partial class StemotionContext : DbContext
 
             entity.Property(e => e.Description)
                 .HasColumnName("description");
+
+            entity.Property(e => e.OrderIndex)
+     .HasColumnName("order_index")  // ✅ Map column name
+     .IsRequired();
+
+            entity.HasIndex(e => e.OrderIndex)  // ✅ Tạo index
+                .HasDatabaseName("IX_Grade_OrderIndex");
         });
 
         modelBuilder.Entity<Subject>(entity =>
@@ -188,6 +196,8 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(s => s.GradeId)
                 .HasConstraintName("FK_Subject.grade_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.OrderIndex).IsRequired();
         });
 
         modelBuilder.Entity<Chapter>(entity =>
@@ -212,6 +222,8 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(c => c.SubjectId)
                 .HasConstraintName("FK_Chapter.subject_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.OrderIndex).IsRequired();
         });
 
         modelBuilder.Entity<Lesson>(entity =>
@@ -239,6 +251,9 @@ public partial class StemotionContext : DbContext
                 .HasForeignKey(l => l.ChapterId)
                 .HasConstraintName("FK_Lesson.chapter_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.OrderIndex).IsRequired();
+
         });
         modelBuilder.Entity<LessonContent>(entity =>
         {
@@ -600,6 +615,63 @@ public partial class StemotionContext : DbContext
       .HasForeignKey(sp => sp.SubscriptionId)
       .OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<StudentProgress>(entity =>
+        {
+            entity.ToTable("StudentProgress");
+
+            entity.HasKey(sp => sp.StudentProgressId);
+
+            entity.Property(sp => sp.StudentProgressId)
+                .HasColumnName("student_progress_id")
+                .HasDefaultValueSql("NEWID()");
+
+            entity.Property(sp => sp.StudentId)
+                .HasColumnName("student_id")
+                .IsRequired();
+
+            entity.Property(sp => sp.LessonId)
+                .HasColumnName("lesson_id")
+                .IsRequired();
+
+            entity.Property(sp => sp.IsCompleted)
+                .HasColumnName("is_completed")
+                .HasDefaultValue(false);
+
+            entity.Property(sp => sp.CompletionPercentage)
+                .HasColumnName("completion_percentage");
+
+            entity.Property(sp => sp.StartedAt)
+                .HasColumnName("started_at");
+
+            entity.Property(sp => sp.CompletedAt)
+                .HasColumnName("completed_at");
+
+            entity.Property(sp => sp.LastAccessedAt)
+                .HasColumnName("last_accessed_at");
+
+            entity.Property(sp => sp.Status)
+                .HasColumnName("status")
+                .HasMaxLength(50)
+                .HasDefaultValue("NotStarted");
+
+            entity.HasOne(sp => sp.Student)
+                .WithMany(u => u.StudentProgress)
+                .HasForeignKey(sp => sp.StudentId)
+                .HasConstraintName("FK_StudentProgress_student_id")
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(sp => sp.Lesson)
+                .WithMany(l => l.StudentProgress)
+                .HasForeignKey(sp => sp.LessonId)
+                .HasConstraintName("FK_StudentProgress_lesson_id")
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(sp => new { sp.StudentId, sp.LessonId })
+                .IsUnique()
+                .HasDatabaseName("IX_StudentProgress_Student_Lesson");
+        });
+
 
     }
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

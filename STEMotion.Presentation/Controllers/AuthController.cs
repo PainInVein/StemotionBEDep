@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using STEMotion.Application.DTO.RequestDTOs;
@@ -21,22 +21,91 @@ namespace STEMotion.Presentation.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
-
-
-        public AuthController(IOtpService otpService, IUnitOfWork unitOfWork, IUserService userService, IConfiguration configuration)
+        private readonly IJWTService _jwtService;
+        public AuthController(IOtpService otpService, IUnitOfWork unitOfWork, IUserService userService, IConfiguration configuration, IJWTService jwtService)
         {
             _otpService = otpService;
             _unitOfWork = unitOfWork;
             _userService = userService;
             _configuration = configuration;
+            _jwtService = jwtService;
         }
 
         [EndpointDescription("API này đăng nhập User")]
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
             var result = await _userService.LoginUser(loginRequestDTO);
-            return Ok(ResponseDTO<string>.Success(result, "Đăng nhập thành công"));
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddHours(1)
+            };
+
+            Response.Cookies.Append("accessToken", result, cookieOptions);
+            var principal = _jwtService.ValidateToken(result);
+            var userId = Guid.Parse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+
+            var userResponse = new UserResponseDTO
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Phone = user.Phone,
+                GradeLevel = user.GradeLevel,
+                AvatarUrl = user.AvatarUrl,
+                Status = user.Status,
+                RoleName = user.Role?.Name
+            };
+
+
+            return Ok(ResponseDTO<UserResponseDTO>.Success(userResponse, "Đăng nhập thành công"));
+        }
+
+        [HttpGet("me")]
+        [EndpointDescription("Lấy thông tin user từ cookie")]
+        public async Task<IActionResult> GetMe()
+        {
+            try
+            {
+                var token = Request.Cookies["accessToken"];
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Unauthorized(ResponseDTO<object>.Fail("Không tìm thấy token", "UNAUTHORIZED"));
+                }
+
+                var principal = _jwtService.ValidateToken(token);
+                var userId = Guid.Parse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return Unauthorized(ResponseDTO<object>.Fail("User không tồn tại", "USER_NOT_FOUND"));
+                }
+
+                var userResponse = new UserResponseDTO
+                {
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.Phone,
+                    GradeLevel = user.GradeLevel,
+                    AvatarUrl = user.AvatarUrl,
+                    Status = user.Status,
+                    RoleName = user.Role?.Name
+                };
+
+                return Ok(ResponseDTO<UserResponseDTO>.Success(userResponse, "Lấy thông tin user thành công"));
+            }
+            catch (Exception)
+            {
+                return Unauthorized(ResponseDTO<object>.Fail("Token không hợp lệ hoặc đã hết hạn", "INVALID_TOKEN"));
+            }
         }
 
         [HttpGet("google-login")]
@@ -80,11 +149,11 @@ namespace STEMotion.Presentation.Controllers
                 HttpOnly = true,
                 Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddHours(24)
+                Expires = DateTime.UtcNow.AddHours(1)
             };
 
             Response.Cookies.Append("accessToken", response, cookieOptions);
-            return Redirect("http://localhost:5173");
+            return Redirect("http://localhost:5173/google-callback");
         }
 
         [HttpPost("register/send-otp")]
@@ -117,7 +186,13 @@ namespace STEMotion.Presentation.Controllers
             var result = await _userService.ChangePassword(request);
             return Ok(ResponseDTO<UserResponseDTO>.Success(result, "Đổi mật khẩu thành công"));
         }
+
+        [HttpPost("logout")]
+        [EndpointDescription("Đăng xuất - xóa cookie")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("accessToken");
+            return Ok(ResponseDTO<object>.Success(null, "Đăng xuất thành công"));
+        }
     }
 }
-
-

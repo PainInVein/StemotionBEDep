@@ -54,18 +54,6 @@ namespace STEMotion.Presentation.Controllers
             return Ok(ResponseDTO<PaginatedResponseDTO<GameResponseDTO>>.Success(result, "Lấy danh sách game thành công"));
         }
 
-        /// <summary>
-        /// Lấy dữ liệu để chơi game (Student only)
-        /// </summary>
-        [HttpGet("{id}/play")]
-        [EndpointDescription("API lấy tất cả game đang hoạt động")]
-        public async Task<IActionResult> PlayGame(Guid id)
-        {
-            var playData = await _gameService.GetGameForPlayAsync(id);
-            return Ok(ResponseDTO<PlayGameDTO>.Success(playData, "Lấy dữ liệu game thành công"));
-        }
-
-
         [HttpPost]
         [EndpointDescription("API tạo game mới")]
         public async Task<IActionResult> CreateGame([FromBody] CreateGameDTO dto)

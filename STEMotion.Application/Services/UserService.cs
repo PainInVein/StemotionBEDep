@@ -52,7 +52,7 @@ namespace STEMotion.Application.Services
 
                 user = await _unitOfWork.UserRepository.GetUserByEmailWithRoleAsync(newUser.Email, false);
             }
-            var token = _jwtService.GenerateToken(user.Email, user.Role.Name);
+            var token = _jwtService.GenerateToken(user.UserId,user.Email, user.Role.Name);
             return token;
         }
 
@@ -159,7 +159,7 @@ namespace STEMotion.Application.Services
             }
 
             //var response = _mapper.Map<UserResponseDTO>(user);
-            var response = _jwtService.GenerateToken(loginRequest.Email, user.Role.Name);
+            var response = _jwtService.GenerateToken(user.UserId,loginRequest.Email, user.Role.Name);
 
             return response;
         }

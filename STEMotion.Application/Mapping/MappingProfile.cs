@@ -42,6 +42,8 @@ namespace STEMotion.Application.Middleware
 
             CreateMap<Chapter, ChapterResponseDTO>()
                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.SubjectName))
+                    .ForMember(dest => dest.GradeLevel,
+        opt => opt.MapFrom(src => src.Subject.Grade.GradeLevel))
                 .ReverseMap();
 
             CreateMap<ChapterRequestDTO, Chapter>().IgnoreAllNonExisting().ReverseMap();
@@ -49,6 +51,8 @@ namespace STEMotion.Application.Middleware
 
             CreateMap<Lesson, LessonResponseDTO>()
                 .ForMember(dest => dest.ChapterName, opt => opt.MapFrom(src => src.Chapter.ChapterName))
+                    .ForMember(dest => dest.GradeLevel,
+        opt => opt.MapFrom(src => src.Chapter.Subject.Grade.GradeLevel))
                 .ReverseMap();
 
             CreateMap<LessonRequestDTO, Lesson>().IgnoreAllNonExisting().ReverseMap();
@@ -129,6 +133,11 @@ namespace STEMotion.Application.Middleware
                 .ForMember(dest => dest.BestCorrectAnswers, opt => opt.MapFrom(src => src.CorrectAnswers))
                 .ForMember(dest => dest.LastPlayedAt, opt => opt.MapFrom(src => src.PlayedAt))
                 .ForMember(dest => dest.AttemptCount, opt => opt.Ignore());
+
+            // StudentProgress mappings
+            CreateMap<StudentProgress, LessonProgressResponseDTO>()
+                .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName))
+                .ForMember(dest => dest.EstimatedTime, opt => opt.MapFrom(src => src.Lesson.EstimatedTime));
         }
     }
 }

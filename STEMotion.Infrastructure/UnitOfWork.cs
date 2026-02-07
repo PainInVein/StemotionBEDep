@@ -55,6 +55,8 @@ namespace STEMotion.Infrastructure
         public ISubscriptionRepository _subscriptionRepository;
         public ISubscriptionRepository SubscriptionRepository => _subscriptionRepository ??= new SubscriptionRepository(_context);
 
+        public IStudentProgressRepository _progressRepository;
+        public IStudentProgressRepository StudentProgressRepository => _progressRepository ??= new StudentProgressRepository(_context);
         public ISubscriptionPaymentRepository _subscriptionPaymentRepository;
         public ISubscriptionPaymentRepository SubscriptionPaymentRepository => _subscriptionPaymentRepository ??= new SubscriptionPaymentRepository(_context);
 
