@@ -21,6 +21,9 @@ namespace STEMotion.Domain.Entities
         public DateTime CreatedAt { get; set; }
 
         public virtual Role Role { get; set; }
+        public virtual ICollection<ParentStudent> ParentRelations { get; set; }
+
+        public virtual ICollection<ParentStudent> StudentRelations { get; set; }
 
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
