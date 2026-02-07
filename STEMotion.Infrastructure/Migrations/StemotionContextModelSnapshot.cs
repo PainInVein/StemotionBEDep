@@ -276,27 +276,6 @@ namespace STEMotion.Infrastructure.Migrations
                     b.ToTable("LessonContent", (string)null);
                 });
 
-            modelBuilder.Entity("STEMotion.Domain.Entities.ParentStudent", b =>
-                {
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("parent_id");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("student_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ParentId", "StudentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("ParentStudent", (string)null);
-                });
-
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
                     b.Property<Guid>("PaymentId")
@@ -679,27 +658,6 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("STEMotion.Domain.Entities.ParentStudent", b =>
-                {
-                    b.HasOne("STEMotion.Domain.Entities.User", "Parent")
-                        .WithMany("StudentRelations")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_ParentStudent.parent_id");
-
-                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
-                        .WithMany("ParentRelations")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_ParentStudent.student_id");
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("STEMotion.Domain.Entities.User", "User")
@@ -760,41 +718,37 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Navigation("Lessons");
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Game", b =>
+                {
+                    b.Navigation("GameResults");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.Lesson", b =>
+                {
+                    b.Navigation("LessonContents");
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
                     b.Navigation("SubscriptionPayment")
                         .IsRequired();
-                    b.Navigation("SubscriptionPayments");
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Game", b =>
-                        {
-                            b.Navigation("GameResults");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Lesson", b =>
-                        {
-                            b.Navigation("LessonContents");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
-                        {
-                            b.Navigation("Chapters");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.Subscription", b =>
-                        {
-                            b.Navigation("SubscriptionPayments");
-                        });
-
-                    modelBuilder.Entity("STEMotion.Domain.Entities.User", b =>
-                        {
-                            b.Navigation("ParentRelations");
-
-                            b.Navigation("Payments");
-
-                            b.Navigation("StudentRelations");
-                        });
-#pragma warning restore 612, 618
                 });
-    }
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
+                {
+                    b.Navigation("Chapters");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.Subscription", b =>
+                {
+                    b.Navigation("SubscriptionPayments");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Payments");
+                });
+#pragma warning restore 612, 618
+        }
     }
 }
