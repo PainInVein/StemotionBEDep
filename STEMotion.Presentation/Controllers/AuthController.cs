@@ -153,7 +153,7 @@ namespace STEMotion.Presentation.Controllers
             };
 
             Response.Cookies.Append("accessToken", response, cookieOptions);
-            return Redirect("http://localhost:5173");
+            return Redirect("http://localhost:5173/google-callback");
         }
 
         [HttpPost("register/send-otp")]

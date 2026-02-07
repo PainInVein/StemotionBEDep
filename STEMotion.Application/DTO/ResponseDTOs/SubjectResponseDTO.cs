@@ -12,6 +12,8 @@ namespace STEMotion.Application.DTO.ResponseDTOs
         public int GradeLevel { get; set; }
         public string SubjectName { get; set; }
         public string Description { get; set; }
+        public int OrderIndex { get; set; }
+
         public string Status { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace STEMotion.Domain.Entities
         public Guid SubjectId { get; set; }
         public string ChapterName { get; set; }
         public string Status { get; set; }
+        public int OrderIndex { get; set; }
 
         public virtual Subject Subject { get; set; }
         public virtual ICollection<Lesson> Lessons { get; set; }
