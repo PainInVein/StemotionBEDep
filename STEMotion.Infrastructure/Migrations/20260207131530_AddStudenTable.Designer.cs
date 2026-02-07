@@ -12,8 +12,8 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    [Migration("20260130102024_UpdatePaymentSubscriptionContextAllowNull")]
-    partial class UpdatePaymentSubscriptionContextAllowNull
+    [Migration("20260207131530_AddStudenTable")]
+    partial class AddStudenTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("chapter_name");
 
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -52,6 +55,113 @@ namespace STEMotion.Infrastructure.Migrations
                     b.HasIndex("SubjectId");
 
                     b.ToTable("Chapter", (string)null);
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.Game", b =>
+                {
+                    b.Property<Guid>("GameId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("game_id")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("ConfigData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("config_data");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("GameCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("game_code");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<bool>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("status");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("thumbnail_url");
+
+                    b.HasKey("GameId");
+
+                    b.HasIndex("GameCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Game_GameCode");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("Game", (string)null);
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.GameResult", b =>
+                {
+                    b.Property<Guid>("GameResultId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("game_result_id")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<int>("CorrectAnswers")
+                        .HasColumnType("int")
+                        .HasColumnName("correct_answers");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("PlayDuration")
+                        .HasColumnType("int")
+                        .HasColumnName("play_duration");
+
+                    b.Property<DateTime>("PlayedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("played_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("score");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("student_id");
+
+                    b.Property<int>("TotalQuestions")
+                        .HasColumnType("int")
+                        .HasColumnName("total_questions");
+
+                    b.HasKey("GameResultId");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("PlayedAt")
+                        .HasDatabaseName("IX_GameResult_PlayedAt");
+
+                    b.HasIndex("StudentId", "GameId")
+                        .HasDatabaseName("IX_GameResult_StudentId_GameId");
+
+                    b.ToTable("GameResult", (string)null);
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Grade", b =>
@@ -77,6 +187,10 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
 
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int")
+                        .HasColumnName("order_index");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -85,6 +199,9 @@ namespace STEMotion.Infrastructure.Migrations
 
                     b.HasIndex("GradeLevel")
                         .IsUnique();
+
+                    b.HasIndex("OrderIndex")
+                        .HasDatabaseName("IX_Grade_OrderIndex");
 
                     b.ToTable("Grade", (string)null);
                 });
@@ -111,6 +228,9 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("lessonName");
 
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -120,6 +240,56 @@ namespace STEMotion.Infrastructure.Migrations
                     b.HasIndex("ChapterId");
 
                     b.ToTable("Lesson", (string)null);
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.LessonContent", b =>
+                {
+                    b.Property<Guid>("LessonContentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("lesson_content_id")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("content_type");
+
+                    b.Property<string>("FormulaLatex")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("formula_latex");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<string>("MediaUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("media_url");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int")
+                        .HasColumnName("order_index");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TextContent")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text_content");
+
+                    b.HasKey("LessonContentId");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("LessonContent", (string)null);
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.ParentStudent", b =>
@@ -217,6 +387,129 @@ namespace STEMotion.Infrastructure.Migrations
                     b.ToTable("Role", (string)null);
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
+                {
+                    b.Property<Guid>("StudentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("student_id")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("avatar_url");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("first_name");
+
+                    b.Property<int?>("GradeLevel")
+                        .HasColumnType("int")
+                        .HasColumnName("grade_level");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("last_name");
+
+                    b.Property<Guid>("ParentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("Password")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("password");
+
+                    b.Property<string>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Username")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("username");
+
+                    b.HasKey("StudentId");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Student_Username")
+                        .HasFilter("[username] IS NOT NULL");
+
+                    b.ToTable("Student", (string)null);
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.StudentProgress", b =>
+                {
+                    b.Property<Guid>("StudentProgressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("student_progress_id")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("completed_at");
+
+                    b.Property<int?>("CompletionPercentage")
+                        .HasColumnType("int")
+                        .HasColumnName("completion_percentage");
+
+                    b.Property<bool>("IsCompleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_completed");
+
+                    b.Property<DateTime?>("LastAccessedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("last_accessed_at");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("NotStarted")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("student_id");
+
+                    b.HasKey("StudentProgressId");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("StudentId", "LessonId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_StudentProgress_Student_Lesson");
+
+                    b.ToTable("StudentProgress", (string)null);
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
                 {
                     b.Property<Guid>("SubjectId")
@@ -233,6 +526,9 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Property<Guid>("GradeId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("grade_id");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -310,7 +606,7 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("account_number");
 
-                    b.Property<decimal>("Amount")
+                    b.Property<decimal?>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
@@ -468,6 +764,39 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Game", b =>
+                {
+                    b.HasOne("STEMotion.Domain.Entities.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Game.lesson_id");
+
+                    b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.GameResult", b =>
+                {
+                    b.HasOne("STEMotion.Domain.Entities.Game", "Game")
+                        .WithMany("GameResults")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_GameResult.game_id");
+
+                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_GameResult.student_id");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.Lesson", b =>
                 {
                     b.HasOne("STEMotion.Domain.Entities.Chapter", "Chapter")
@@ -478,6 +807,18 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasConstraintName("FK_Lesson.chapter_id");
 
                     b.Navigation("Chapter");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.LessonContent", b =>
+                {
+                    b.HasOne("STEMotion.Domain.Entities.Lesson", "Lesson")
+                        .WithMany("LessonContents")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_LessonContent.lesson_id");
+
+                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.ParentStudent", b =>
@@ -511,6 +852,39 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasConstraintName("FK_Payment_UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
+                {
+                    b.HasOne("STEMotion.Domain.Entities.User", "Parent")
+                        .WithMany("Students")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Student_parent_id");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.StudentProgress", b =>
+                {
+                    b.HasOne("STEMotion.Domain.Entities.Lesson", "Lesson")
+                        .WithMany("StudentProgress")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_StudentProgress_lesson_id");
+
+                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
+                        .WithMany("StudentProgress")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_StudentProgress_student_id");
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
@@ -561,6 +935,18 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Navigation("Lessons");
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Game", b =>
+                {
+                    b.Navigation("GameResults");
+                });
+
+            modelBuilder.Entity("STEMotion.Domain.Entities.Lesson", b =>
+                {
+                    b.Navigation("LessonContents");
+
+                    b.Navigation("StudentProgress");
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
                     b.Navigation("SubscriptionPayment")
@@ -583,7 +969,11 @@ namespace STEMotion.Infrastructure.Migrations
 
                     b.Navigation("Payments");
 
+                    b.Navigation("StudentProgress");
+
                     b.Navigation("StudentRelations");
+
+                    b.Navigation("Students");
                 });
 #pragma warning restore 612, 618
         }
