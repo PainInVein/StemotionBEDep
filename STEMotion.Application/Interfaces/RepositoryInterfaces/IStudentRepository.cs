@@ -9,5 +9,7 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
 {
     public interface IStudentRepository : IGenericRepository<Student>
     {
+        Task<IEnumerable<Student>> GetStudentsByParentIdAsync(Guid parentId);
+        Task<Student?> GetStudentByIdWithParentAsync(Guid studentId);
     }
 }

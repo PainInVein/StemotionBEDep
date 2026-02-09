@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STEMotion.Infrastructure.DBContext;
 
@@ -11,9 +12,11 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    partial class StemotionContextModelSnapshot : ModelSnapshot
+    [Migration("20260208155017_ThanhDT_RemoveTableParentStudent")]
+    partial class ThanhDT_RemoveTableParentStudent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -475,14 +478,9 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("student_id");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("StudentProgressId");
 
                     b.HasIndex("LessonId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("StudentId", "LessonId")
                         .IsUnique()
@@ -835,16 +833,12 @@ namespace STEMotion.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_StudentProgress_lesson_id");
 
-                    b.HasOne("STEMotion.Domain.Entities.Student", "Student")
+                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
                         .WithMany("StudentProgress")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_StudentProgress_student_id");
-
-                    b.HasOne("STEMotion.Domain.Entities.User", null)
-                        .WithMany("StudentProgress")
-                        .HasForeignKey("UserId");
 
                     b.Navigation("Lesson");
 
@@ -915,11 +909,6 @@ namespace STEMotion.Infrastructure.Migrations
                 {
                     b.Navigation("SubscriptionPayment")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
-                {
-                    b.Navigation("StudentProgress");
                 });
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>

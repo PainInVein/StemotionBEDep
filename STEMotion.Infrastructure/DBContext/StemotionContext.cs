@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using STEMotion.Domain.Entities;
 using System;
@@ -20,7 +20,6 @@ public partial class StemotionContext : DbContext
     // DbSets
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
-    public DbSet<ParentStudent> ParentStudents { get; set; }
     public DbSet<Grade> Grades { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Chapter> Chapters { get; set; }
@@ -140,30 +139,6 @@ public partial class StemotionContext : DbContext
                 .WithMany()
                 .HasForeignKey(u => u.RoleId)
                 .HasConstraintName("FK_User.role_id")
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<ParentStudent>(entity =>
-        {
-            entity.ToTable("ParentStudent");
-            entity.HasKey(ps => new { ps.ParentId, ps.StudentId });
-
-            entity.Property(e => e.ParentId)
-                .HasColumnName("parent_id");
-
-            entity.Property(e => e.StudentId)
-                .HasColumnName("student_id");
-
-            entity.HasOne(ps => ps.Parent)
-                .WithMany(u => u.StudentRelations)
-                .HasForeignKey(ps => ps.ParentId)
-                .HasConstraintName("FK_ParentStudent.parent_id")
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(ps => ps.Student)
-                .WithMany(u => u.ParentRelations)
-                .HasForeignKey(ps => ps.StudentId)
-                .HasConstraintName("FK_ParentStudent.student_id")
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -682,7 +657,7 @@ public partial class StemotionContext : DbContext
                 .HasDefaultValue("NotStarted");
 
             entity.HasOne(sp => sp.Student)
-                .WithMany(u => u.StudentProgress)
+                .WithMany(s => s.StudentProgress)
                 .HasForeignKey(sp => sp.StudentId)
                 .HasConstraintName("FK_StudentProgress_student_id")
                 .OnDelete(DeleteBehavior.Cascade);

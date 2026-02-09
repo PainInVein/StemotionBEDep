@@ -64,6 +64,8 @@ namespace STEMotion.Infrastructure.Configuration
             services.AddScoped<IGameService, GameService>();
             services.AddScoped<IGameResultRepository, GameResultRepository>();
             services.AddScoped<IGameResultService, GameResultService>();
+            services.AddScoped<IStudentProgressRepository, StudentProgressRepository>();
+            services.AddScoped<IStudentProgressService, StudentProgressService>();
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

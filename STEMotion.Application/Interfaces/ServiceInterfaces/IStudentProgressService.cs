@@ -62,5 +62,13 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         /// <param name="lessonId">ID của bài học</param>
         /// <returns>Thông tin tiến độ bài học</returns>
         Task<LessonProgressResponseDTO> GetLessonProgressAsync(Guid studentId, Guid lessonId);
+
+        /// <summary>
+        /// Kiểm tra phụ huynh có quyền xem tiến độ của học sinh hay không
+        /// </summary>
+        /// <param name="parentId">ID của phụ huynh</param>
+        /// <param name="studentId">ID của học sinh</param>
+        /// <returns>True nếu có quyền, False nếu không</returns>
+        Task<bool> ValidateParentAccessAsync(Guid parentId, Guid studentId);
     }
 }

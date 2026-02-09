@@ -24,6 +24,13 @@ namespace STEMotion.Infrastructure.Repositories
                             .Include(u => u.Role)
                             .FirstOrDefaultAsync();
         }
+
+        public async Task<User?> GetUserWithChildrenAsync(Guid parentId, bool trackChanges)
+        {
+            return await FindByCondition(u => u.UserId == parentId, trackChanges)
+                            .Include(u => u.Students)
+                            .FirstOrDefaultAsync();
+        }
     }
 }
 
