@@ -40,7 +40,7 @@ namespace STEMotion.Presentation.Controllers
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(1)
             };
 
@@ -148,7 +148,7 @@ namespace STEMotion.Presentation.Controllers
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(1)
             };
 

@@ -13,5 +13,6 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
         Task<StudentProgress?> GetProgressByStudentAndLesssonAsync(Guid studentId, Guid lessonId);
         Task<IEnumerable<StudentProgress>> GetProgressByChapterAsync(Guid studentId, Guid chapterId);
         Task<IEnumerable<StudentProgress>> GetProgressBySubjectAsync(Guid studentId, Guid subjectId);
+        Task<bool> CanParentAccessStudentProgressAsync(Guid parentId, Guid studentId);
     }
 }

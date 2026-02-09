@@ -12,8 +12,10 @@ namespace STEMotion.Infrastructure.Repositories
 {
     public class StudentProgressRepository : GenericRepository<StudentProgress>, IStudentProgressRepository
     {
+        private readonly StemotionContext _context;
         public StudentProgressRepository(StemotionContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<StudentProgress>> GetProgressByChapterAsync(Guid studentId, Guid chapterId)
@@ -46,6 +48,16 @@ namespace STEMotion.Infrastructure.Repositories
                                  .ThenInclude(x => x.Subject)
                                  .ThenInclude(x => x.Grade)
                          .ToListAsync();
+        }
+
+        public async Task<bool> CanParentAccessStudentProgressAsync(Guid parentId, Guid studentId)
+        {
+            // Check if student exists and belongs to the parent
+            var student = await _context.Students
+                .Where(s => s.StudentId == studentId && s.ParentId == parentId)
+                .FirstOrDefaultAsync();
+
+            return student != null;
         }
     }
 }

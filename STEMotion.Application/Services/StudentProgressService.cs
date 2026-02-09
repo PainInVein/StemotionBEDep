@@ -61,7 +61,7 @@ namespace STEMotion.Application.Services
             if (lesson == null)
                 throw new NotFoundException("Lesson", lessonId);
 
-            var student = await _unitOfWork.UserRepository.GetByIdAsync(studentId);
+            var student = await _unitOfWork.StudentRepository.GetByIdAsync(studentId);
             if (student == null)
                 throw new NotFoundException("Student", studentId);
 
@@ -241,7 +241,7 @@ namespace STEMotion.Application.Services
         }
         public async Task<StudentProgressOverviewDTO> GetStudentProgressOverviewAsync(Guid studentId)
         {
-            var student = await _unitOfWork.UserRepository.GetByIdAsync(studentId);
+            var student = await _unitOfWork.StudentRepository.GetByIdAsync(studentId);
             if (student == null)
                 throw new NotFoundException("Student", studentId);
 
@@ -277,7 +277,7 @@ namespace STEMotion.Application.Services
 
             return new StudentProgressOverviewDTO
             {
-                StudentId = student.UserId,
+                StudentId = student.StudentId,
                 StudentName = $"{student.FirstName} {student.LastName}",
                 GradeLevel = student.GradeLevel ?? 0,
                 TotalSubjects = allSubjects.Count,
@@ -296,30 +296,23 @@ namespace STEMotion.Application.Services
             if (parent == null)
                 throw new NotFoundException("Parent", parentId);
 
-            // Lấy danh sách student IDs từ ParentStudent relationship
-            var parentUser = await _unitOfWork.UserRepository
-                .FindByCondition(u => u.UserId == parentId, false)
-                .Include(u => u.StudentRelations)
-                    .ThenInclude(ps => ps.Student)
-                .FirstOrDefaultAsync();
+            // Lấy danh sách students trực tiếp từ Student table theo ParentId
+            var students = await _unitOfWork.StudentRepository.GetStudentsByParentIdAsync(parentId);
 
-            if (parentUser?.StudentRelations == null || !parentUser.StudentRelations.Any())
+            if (students == null || !students.Any())
             {
                 return new List<ParentStudentListDTO>(); // Không có học sinh nào
             }
 
             var result = new List<ParentStudentListDTO>();
 
-            foreach (var relation in parentUser.StudentRelations.Where(r => r.Status == "Active"))
+            foreach (var student in students)
             {
-                var studentId = relation.StudentId;
-                var student = relation.Student;
-
-                var overview = await GetStudentProgressOverviewAsync(studentId);
+                var overview = await GetStudentProgressOverviewAsync(student.StudentId);
 
                 result.Add(new ParentStudentListDTO
                 {
-                    StudentId = studentId,
+                    StudentId = student.StudentId,
                     StudentName = $"{student.FirstName} {student.LastName}",
                     GradeLevel = student.GradeLevel ?? 0,
                     AvatarUrl = student.AvatarUrl,
@@ -329,6 +322,11 @@ namespace STEMotion.Application.Services
             }
 
             return result;
+        }
+
+        public async Task<bool> ValidateParentAccessAsync(Guid parentId, Guid studentId)
+        {
+            return await _unitOfWork.StudentProgressRepository.CanParentAccessStudentProgressAsync(parentId, studentId);
         }
     }
 }

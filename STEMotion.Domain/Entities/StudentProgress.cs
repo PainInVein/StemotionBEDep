@@ -17,7 +17,7 @@ namespace STEMotion.Domain.Entities
         public DateTime? CompletedAt { get; set; }
         public DateTime? LastAccessedAt { get; set; }
         public string Status { get; set; }
-        public virtual User Student { get; set; }
+        public virtual Student Student { get; set; }
         public virtual Lesson Lesson { get; set; }
     }
 }

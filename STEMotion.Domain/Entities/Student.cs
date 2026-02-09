@@ -18,6 +18,7 @@ namespace STEMotion.Domain.Entities
         public int? GradeLevel { get; set; }             
         public DateTime CreatedAt { get; set; }
         public virtual User Parent { get; set; }
+        public virtual ICollection<StudentProgress> StudentProgress { get; set; }
         public string? Status { get; set; }
     }
 }
