@@ -26,7 +26,7 @@ namespace STEMotion.Application.Services
         public async Task<LessonProgressResponseDTO> GetLessonProgressAsync(Guid studentId, Guid lessonId)
         {
             var progress = await _unitOfWork.StudentProgressRepository
-                .GetProgressByStudentAndLesssonAsync(studentId, lessonId);
+                .GetProgressByStudentAndLessonAsync(studentId, lessonId);
 
             if (progress == null)
             {
@@ -39,7 +39,7 @@ namespace STEMotion.Application.Services
         public async Task<LessonProgressResponseDTO> StartLessonAsync(Guid studentId, Guid lessonId)
         {
             var existingProgress = await _unitOfWork.StudentProgressRepository
-                .GetProgressByStudentAndLesssonAsync(studentId, lessonId);
+                .GetProgressByStudentAndLessonAsync(studentId, lessonId);
 
             if (existingProgress != null)
             {
@@ -80,7 +80,7 @@ namespace STEMotion.Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             var createdProgress = await _unitOfWork.StudentProgressRepository
-                .GetProgressByStudentAndLesssonAsync(studentId, lessonId);
+                .GetProgressByStudentAndLessonAsync(studentId, lessonId);
 
             return _mapper.Map<LessonProgressResponseDTO>(createdProgress);
         }
@@ -94,13 +94,13 @@ namespace STEMotion.Application.Services
             }
 
             var progress = await _unitOfWork.StudentProgressRepository
-                .GetProgressByStudentAndLesssonAsync(studentId, lessonId);
+                .GetProgressByStudentAndLessonAsync(studentId, lessonId);
 
             if (progress == null)
             {
                 await StartLessonAsync(studentId, lessonId);
                 progress = await _unitOfWork.StudentProgressRepository
-                    .GetProgressByStudentAndLesssonAsync(studentId, lessonId);
+                    .GetProgressByStudentAndLessonAsync(studentId, lessonId);
             }
 
             progress.CompletionPercentage = completionPercentage;
@@ -271,9 +271,17 @@ namespace STEMotion.Application.Services
                 ? allProgress.Max(p => p.LastAccessedAt) 
                 : null;
 
-            int overallCompletion = totalLessons > 0
+            var overallCompletion = totalLessons > 0
                 ? (int)Math.Round((double)completedLessons / totalLessons * 100)
                 : 0;
+
+            // Calculate new stats
+            var insights = await GetPerformanceInsightsAsync(studentId);
+            var allGameResults = await _unitOfWork.GameResultRepository
+                .FindByCondition(g => g.StudentId == studentId, false)
+                .ToListAsync();
+
+            var totalPoints = allGameResults.Sum(g => g.Score);
 
             return new StudentProgressOverviewDTO
             {
@@ -286,7 +294,13 @@ namespace STEMotion.Application.Services
                 CompletedLessons = completedLessons,
                 OverallCompletionPercentage = overallCompletion,
                 LastActivityDate = lastActivity,
-                Subjects = subjectProgressList
+                Subjects = subjectProgressList,
+                
+                // New Stats
+                LearningStreak = insights.LearningStreak,
+
+                TotalPoints = totalPoints, 
+                CurrentLevel = (completedLessons / 10) + 1 // Simple level calculation logic
             };
         }
 
@@ -316,7 +330,7 @@ namespace STEMotion.Application.Services
                     StudentName = $"{student.FirstName} {student.LastName}",
                     GradeLevel = student.GradeLevel ?? 0,
                     AvatarUrl = student.AvatarUrl,
-                    OverallProgress = overview.OverallCompletionPercentage,
+                    OverallCompletionPercentage = overview.OverallCompletionPercentage,
                     LastActivityDate = overview.LastActivityDate
                 });
             }
@@ -327,6 +341,194 @@ namespace STEMotion.Application.Services
         public async Task<bool> ValidateParentAccessAsync(Guid parentId, Guid studentId)
         {
             return await _unitOfWork.StudentProgressRepository.CanParentAccessStudentProgressAsync(parentId, studentId);
+        }
+
+        public async Task<IEnumerable<RecentActivityResponseDTO>> GetRecentActivitiesAsync(Guid studentId, int limit = 20, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            // 1. Get Lesson activities from StudentProgress
+            var lessonActivitiesList = await _unitOfWork.StudentProgressRepository.GetRecentProgressAsync(studentId, limit, startDate, endDate);
+            
+            var lessonActivities = lessonActivitiesList.Select(x => new RecentActivityResponseDTO
+                {
+                    ActivityId = x.StudentProgressId,
+                    ActivityName = x.Lesson.LessonName,
+                    ActivityType = "Lesson",
+                    ReferenceId = x.LessonId,
+                    ActivityDate = x.LastAccessedAt.Value,
+                    DurationMinutes = x.CompletedAt.HasValue && x.StartedAt.HasValue 
+                        ? (int)(x.CompletedAt.Value - x.StartedAt.Value).TotalMinutes 
+                        : (x.CompletionPercentage ?? 0) / 5, // Estimate if not completed
+                    Score = x.CompletionPercentage ?? 0,
+                    Status = x.Status,
+                    CorrectAnswers = null,
+                    TotalQuestions = null
+                }).ToList();
+
+            // 2. Get Game activities from GameResult
+            var gameActivitiesList = await _unitOfWork.GameResultRepository.GetRecentGameResultsAsync(studentId, limit, startDate, endDate);
+
+            var gameActivities = gameActivitiesList.Select(x => new RecentActivityResponseDTO
+                {
+                    ActivityId = x.GameResultId,
+                    ActivityName = x.Game.Name,
+                    ActivityType = "Game",
+                    ReferenceId = x.GameId,
+                    ActivityDate = x.PlayedAt,
+                    DurationMinutes = x.PlayDuration / 60,
+                    Score = (double)x.Score,
+                    Status = "Completed",
+                    CorrectAnswers = x.CorrectAnswers,
+                    TotalQuestions = x.TotalQuestions
+                }).ToList();
+
+            // 3. Merge and sort
+            var allActivities = lessonActivities.Concat(gameActivities)
+                .OrderByDescending(x => x.ActivityDate)
+                .Take(limit)
+                .ToList();
+
+            return allActivities;
+        }
+
+        public async Task<PerformanceInsightResponseDTO> GetPerformanceInsightsAsync(Guid studentId)
+        {
+            var response = new PerformanceInsightResponseDTO();
+
+            // 1. Calculate Learning Streak
+            response.LearningStreak = await CalculateStreakAsync(studentId);
+
+            // 2. Game Performance Stats
+            var gameResults = await _unitOfWork.GameResultRepository
+                .FindByCondition(x => x.StudentId == studentId, false)
+                .Include(x => x.Game)
+                .ToListAsync();
+
+            response.TotalGamesPlayed = gameResults.Count;
+            response.AverageGameScore = gameResults.Any() ? Math.Round(gameResults.Average(x => (double)x.Score), 1) : 0;
+
+            // Chi phan tich khi co it nhat 5 lan choi game            
+            if (gameResults.Count >= 5)
+            {
+                // lay 3 game gan nhat va 3 game cu nhat
+                var recentAvg = gameResults.TakeLast(3).Average(x => (double)x.Score);
+                var olderAvg = gameResults.Take(3).Average(x => (double)x.Score);
+                // Nếu điểm gần đây cao hơn điểm trước thì là "Improving", ngược lại là "Declining", còn lại là "Stable"
+                response.PerformanceTrend = recentAvg > olderAvg ? "Improving" : (recentAvg < olderAvg - 10 ? "Declining" : "Stable");
+            }
+            else
+            {
+                response.PerformanceTrend = "Stable";
+            }
+
+            if (response.AverageGameScore > 80)
+            {
+                response.Strengths.Add("Tư duy logic tốt");
+                response.Strengths.Add("Hoàn thành bài tập nhanh");
+                response.SuggestedFocus.Add("Thử thách với các bài toán nâng cao");
+            }
+            else if (response.AverageGameScore < 50) 
+            {
+                response.Weaknesses.Add("Cần cải thiện độ chính xác");
+                response.SuggestedFocus.Add("Ôn tập lại các bài cơ bản");
+            }
+            else
+            {
+                response.Strengths.Add("Tiến bộ đều đặn");
+                response.SuggestedFocus.Add("Duy trì thói quen học tập hàng ngày");
+            }
+
+            return response;
+        }
+
+        public async Task<Dictionary<DateTime, int>> GetStudyTimeStatisticsAsync(Guid studentId, DateTime startDate, DateTime endDate)
+        {
+            var result = new Dictionary<DateTime, int>();
+
+            // Khởi tạo từ ngày bắt đầu đến ngày kết thúc với giá trị 0
+            for (var dt = startDate.Date; dt <= endDate.Date; dt = dt.AddDays(1))
+            {
+                result[dt] = 0;
+            }
+
+            // Cộng dồn thời gian học từ bài học
+            var lessonProgress = await _unitOfWork.StudentProgressRepository
+                .GetProgressByDateRangeAsync(studentId, startDate, endDate);
+
+            foreach (var p in lessonProgress)
+            {
+                if (p.LastAccessedAt.HasValue)
+                {
+                    var date = p.LastAccessedAt.Value.Date;
+                    if (result.ContainsKey(date))
+                    {
+                        // Estimate 15 mins per lesson interaction if duration not tracked
+                        int duration = p.CompletedAt.HasValue && p.StartedAt.HasValue 
+                            ? (int)(p.CompletedAt.Value - p.StartedAt.Value).TotalMinutes 
+                            : 15;
+                        result[date] += duration;
+                    }
+                }
+            }
+
+            // Add game times
+            var gameResults = await _unitOfWork.GameResultRepository
+                .GetGameResultsByDateRangeAsync(studentId, startDate, endDate);
+
+            foreach (var g in gameResults)
+            {
+                 var date = g.PlayedAt.Date;
+                 if (result.ContainsKey(date))
+                 {
+                     result[date] += g.PlayDuration / 60; // Convert seconds to minutes
+                 }
+            }
+
+            return result;
+        }
+
+        private async Task<int> CalculateStreakAsync(Guid studentId)
+        {
+            // Get lesson dates
+            var lessonDates = await _unitOfWork.StudentProgressRepository.GetDistinctLearningDatesAsync(studentId);
+
+            // Get game dates
+            var gameDates = await _unitOfWork.GameResultRepository.GetDistinctPlayDatesAsync(studentId);
+
+            // Merge and sort
+            var allDates = lessonDates.Concat(gameDates)
+                .Distinct()
+                .OrderByDescending(d => d)
+                .ToList();
+
+            if (!allDates.Any()) return 0;
+
+            int streak = 0;
+            var checkDate = DateTime.Today;
+
+            // Allow streak to continue if activity was yesterday (today no activity yet, but streak not broken)
+            if (!allDates.Contains(checkDate))
+            {
+                checkDate = checkDate.AddDays(-1);
+            }
+
+            foreach (var date in allDates)
+            {
+                if (date.Date == checkDate)
+                {
+                    streak++;
+                    checkDate = checkDate.AddDays(-1);
+                }
+                else if (date.Date > checkDate)
+                {
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return streak;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace STEMotion.Domain.Entities
         public int PlayDuration { get; set; }
         public DateTime PlayedAt { get; set; } = DateTime.Now;
 
-        public virtual User Student { get; set; }
+        public virtual Student Student { get; set; }
         public virtual Game Game { get; set; }
     }
 }

@@ -70,5 +70,20 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         /// <param name="studentId">ID của học sinh</param>
         /// <returns>True nếu có quyền, False nếu không</returns>
         Task<bool> ValidateParentAccessAsync(Guid parentId, Guid studentId);
+
+        /// <summary>
+        /// Lấy danh sách hoạt động gần đây (bài học và trò chơi)
+        /// </summary>
+        Task<IEnumerable<RecentActivityResponseDTO>> GetRecentActivitiesAsync(Guid studentId, int limit = 20, DateTime? startDate = null, DateTime? endDate = null);
+
+        /// <summary>
+        /// Lấy phân tích hiệu suất và đề xuất học tập
+        /// </summary>
+        Task<PerformanceInsightResponseDTO> GetPerformanceInsightsAsync(Guid studentId);
+
+        /// <summary>
+        /// Lấy thống kê thời gian học tập theo ngày
+        /// </summary>
+        Task<Dictionary<DateTime, int>> GetStudyTimeStatisticsAsync(Guid studentId, DateTime startDate, DateTime endDate);
     }
 }

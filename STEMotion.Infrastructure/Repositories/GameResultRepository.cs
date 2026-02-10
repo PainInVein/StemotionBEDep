@@ -51,5 +51,43 @@ namespace STEMotion.Infrastructure.Repositories
                 .OrderByDescending(x => x.PlayedAt)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<GameResult>> GetRecentGameResultsAsync(Guid studentId, int limit, DateTime? startDate, DateTime? endDate)
+        {
+            var query = _context.GameResults
+                .AsNoTracking()
+                .Where(x => x.StudentId == studentId)
+                .Include(x => x.Game)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(x => x.PlayedAt >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(x => x.PlayedAt <= endDate.Value);
+
+            return await query
+                .OrderByDescending(x => x.PlayedAt)
+                .Take(limit)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<GameResult>> GetGameResultsByDateRangeAsync(Guid studentId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.GameResults
+                .AsNoTracking()
+                .Where(x => x.StudentId == studentId && x.PlayedAt >= startDate && x.PlayedAt <= endDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<DateTime>> GetDistinctPlayDatesAsync(Guid studentId)
+        {
+            return await _context.GameResults
+                .AsNoTracking()
+                .Where(x => x.StudentId == studentId)
+                .Select(x => x.PlayedAt.Date)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }
