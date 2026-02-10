@@ -560,7 +560,7 @@ public partial class StemotionContext : DbContext
 
             // Foreign Keys
             entity.HasOne(gr => gr.Student)
-                .WithMany()
+                .WithMany(s => s.GameResults)
                 .HasForeignKey(gr => gr.StudentId)
                 .HasConstraintName("FK_GameResult.student_id")
                 .OnDelete(DeleteBehavior.Restrict);

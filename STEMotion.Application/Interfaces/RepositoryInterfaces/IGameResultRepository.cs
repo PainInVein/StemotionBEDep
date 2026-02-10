@@ -19,5 +19,8 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
         Task<GameResult?> GetBestScoreAsync(Guid studentId, Guid gameId);
         Task<IEnumerable<GameResult>> GetByStudentIdAsync(Guid studentId);
         Task<IEnumerable<GameResult>> GetByGameAndStudentAsync(Guid studentId, Guid gameId);
+        Task<IEnumerable<GameResult>> GetRecentGameResultsAsync(Guid studentId, int limit, DateTime? startDate, DateTime? endDate);
+        Task<IEnumerable<GameResult>> GetGameResultsByDateRangeAsync(Guid studentId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<DateTime>> GetDistinctPlayDatesAsync(Guid studentId);
     }
 }

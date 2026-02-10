@@ -78,10 +78,82 @@ namespace STEMotion.Presentation.Controllers
             return Ok(ResponseDTO<StudentProgressOverviewDTO>.Success(result, "Lấy tổng quan thành công"));
         }
 
+        [HttpGet("student/{studentId}/recent-activities")]
+        [EndpointDescription("Lấy danh sách hoạt động gần đây")]
+        public async Task<IActionResult> GetRecentActivities(
+            Guid studentId, 
+            [FromQuery] int limit = 20,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            // Get ParentId from authenticated user claims
+            // Assuming the User ID in token is the Parent's ID
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid parentId))
+            {
+                var hasAccess = await _studentProgressService.ValidateParentAccessAsync(parentId, studentId);
+                if (!hasAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var result = await _studentProgressService.GetRecentActivitiesAsync(studentId, limit, startDate, endDate);
+            return Ok(ResponseDTO<IEnumerable<RecentActivityResponseDTO>>.Success(result, "Lấy danh sách hoạt động thành công"));
+        }
+
+        [HttpGet("student/{studentId}/insights")]
+        [EndpointDescription("Lấy phân tích hiệu suất học tập")]
+        public async Task<IActionResult> GetPerformanceInsights(Guid studentId)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid parentId))
+            {
+                var hasAccess = await _studentProgressService.ValidateParentAccessAsync(parentId, studentId);
+                if (!hasAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var result = await _studentProgressService.GetPerformanceInsightsAsync(studentId);
+            return Ok(ResponseDTO<PerformanceInsightResponseDTO>.Success(result, "Lấy phân tích hiệu suất thành công"));
+        }
+
+        [HttpGet("student/{studentId}/study-time")]
+        [EndpointDescription("Lấy thống kê thời gian học tập theo ngày")]
+        public async Task<IActionResult> GetStudyTimeStatistics(
+            Guid studentId,
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid parentId))
+            {
+                var hasAccess = await _studentProgressService.ValidateParentAccessAsync(parentId, studentId);
+                if (!hasAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var result = await _studentProgressService.GetStudyTimeStatisticsAsync(studentId, startDate, endDate);
+            return Ok(ResponseDTO<Dictionary<DateTime, int>>.Success(result, "Lấy thống kê thời gian thành công"));
+        }
+
         [HttpGet("parent/{parentId}/students")]
         [EndpointDescription("Lấy danh sách học sinh của phụ huynh")]
         public async Task<IActionResult> GetParentStudents(Guid parentId)
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid tokenUserId))
+            {
+                if (tokenUserId != parentId)
+                {
+                    return Forbid();
+                }
+            }
+
             var result = await _studentProgressService.GetParentStudentListAsync(parentId);
             return Ok(ResponseDTO<IEnumerable<ParentStudentListDTO>>.Success(result, "Lấy danh sách thành công"));
         }

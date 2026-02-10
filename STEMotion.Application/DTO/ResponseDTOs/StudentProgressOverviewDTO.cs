@@ -17,6 +17,11 @@ namespace STEMotion.Application.DTO.ResponseDTOs
         public int CompletedLessons { get; set; }
         public int OverallCompletionPercentage { get; set; }
         public DateTime? LastActivityDate { get; set; }
+        
+        public int LearningStreak { get; set; }
+
+        public double TotalPoints { get; set; } // Changed to double to match GameResult.Score
+        public int CurrentLevel { get; set; }
         public List<SubjectProgressResponseDTO> Subjects { get; set; }
     }
 }

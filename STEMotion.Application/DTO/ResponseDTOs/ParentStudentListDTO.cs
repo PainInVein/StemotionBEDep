@@ -12,7 +12,7 @@ namespace STEMotion.Application.DTO.ResponseDTOs
         public string StudentName { get; set; }
         public int GradeLevel { get; set; }
         public string AvatarUrl { get; set; }
-        public int OverallProgress { get; set; }
+        public int OverallCompletionPercentage { get; set; }
         public DateTime? LastActivityDate { get; set; }
 
     }
