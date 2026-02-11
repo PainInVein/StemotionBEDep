@@ -11,5 +11,6 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
     public interface IStudentService
     {
         Task<AddChildrenResponseDTO> AddStudentAsync(AddChildrenRequestDTO addChildrenRequestDTO);
+        Task<StudentLoginResonseDTO?> LoginStudent(StudentLoginRequestDTO studentLoginRequest);
     }
 }

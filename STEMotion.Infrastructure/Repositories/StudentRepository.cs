@@ -28,5 +28,11 @@ namespace STEMotion.Infrastructure.Repositories
                          .Include(s => s.Parent)
                          .FirstOrDefaultAsync();
         }
+
+        public async Task<Student?> GetStudentByUsernameAsync(string? username, bool trackChanges)
+        {
+            return await FindByCondition(u => u.Username == username, trackChanges)
+                            .FirstOrDefaultAsync();
+        }
     }
 }
