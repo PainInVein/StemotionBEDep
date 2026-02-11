@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using STEMotion.Application.DTO.RequestDTOs;
 using STEMotion.Application.DTO.RequestDTOs.StudentReqDTOs;
 using STEMotion.Application.DTO.ResponseDTOs.StudentResponseDTO;
+using STEMotion.Application.Exceptions;
 using STEMotion.Application.Interfaces.RepositoryInterfaces;
 using STEMotion.Application.Interfaces.ServiceInterfaces;
 using STEMotion.Domain.Entities;
@@ -38,6 +40,30 @@ namespace STEMotion.Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             var result = _mapper.Map<AddChildrenResponseDTO>(studentEntity);
+
+            return result;
+        }
+
+        public async Task<StudentLoginResonseDTO?> LoginStudent(StudentLoginRequestDTO studentLoginRequest)
+        {
+            var user = await _unitOfWork.StudentRepository.GetStudentByUsernameAsync(studentLoginRequest.Username, false);
+
+            if (user == null)
+            {
+                throw new UnauthorizedException("Invalid username or password");
+            }
+            if (user.Status != "Active")
+            {
+                throw new ForbiddenException("Student account is inactive");
+            }
+            var checkpassword = _passwordService.VerifyPassword(studentLoginRequest.Password, user.Password);
+
+            if (!checkpassword)
+            {
+                throw new UnauthorizedException("Invalid username or password");
+            }
+
+            var result = _mapper.Map<StudentLoginResonseDTO>(user);
 
             return result;
         }

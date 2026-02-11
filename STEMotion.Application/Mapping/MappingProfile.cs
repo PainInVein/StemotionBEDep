@@ -144,7 +144,8 @@ namespace STEMotion.Application.Middleware
             //Student mappings
             CreateMap<AddChildrenRequestDTO, Student>();
             CreateMap<Student, AddChildrenResponseDTO>();
-                
+            CreateMap<Student, StudentLoginResonseDTO>();
+
         }
     }
 }

@@ -11,5 +11,6 @@ namespace STEMotion.Application.Interfaces.RepositoryInterfaces
     {
         Task<IEnumerable<Student>> GetStudentsByParentIdAsync(Guid parentId);
         Task<Student?> GetStudentByIdWithParentAsync(Guid studentId);
+        Task<Student?> GetStudentByUsernameAsync(string? username, bool trackChanges);
     }
 }
