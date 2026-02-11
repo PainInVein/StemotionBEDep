@@ -25,5 +25,17 @@ namespace STEMotion.Presentation.Controllers
 
             return Ok(ResponseDTO<AddChildrenResponseDTO>.Success(result, "Thêm học sinh thành công"));
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginStudent([FromBody] StudentLoginRequestDTO studentLoginRequest)
+        {
+            var result = await _studentService.LoginStudent(studentLoginRequest);
+            if (result != null)
+            {
+                return Ok(ResponseDTO<StudentLoginResonseDTO>.Success(result, "Đăng nhập thành công"));
+            }
+
+            return BadRequest(ResponseDTO<string>.Fail(null!, "Đăng nhập thất bại"));
+        }
     }
 }
