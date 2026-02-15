@@ -104,7 +104,7 @@ namespace STEMotion.Application.Services
                 throw new NotFoundException("Không tìm thấy game");
             }
 
-            var student = await _unitOfWork.UserRepository.GetByIdAsync(studentId);
+            var student = await _unitOfWork.StudentRepository.GetByIdAsync(studentId);
             if (student == null)
             {
                 throw new NotFoundException("Không tìm thấy học sinh");
@@ -121,6 +121,11 @@ namespace STEMotion.Application.Services
             result.GameName = game.Name;
 
             return result;
+        }
+
+        public async Task<IEnumerable<StudentLeaderboardDTO>> GetLeaderboardAsync(int limit)
+        {
+            return await _unitOfWork.GameResultRepository.GetLeaderboardAsync(limit);
         }
     }
 }

@@ -12,8 +12,8 @@ using STEMotion.Infrastructure.DBContext;
 namespace STEMotion.Infrastructure.Migrations
 {
     [DbContext(typeof(StemotionContext))]
-    [Migration("20260207123310_init")]
-    partial class init
+    [Migration("20260215062912_ThanhDT_ErikDev")]
+    partial class ThanhDT_ErikDev
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -292,27 +292,6 @@ namespace STEMotion.Infrastructure.Migrations
                     b.ToTable("LessonContent", (string)null);
                 });
 
-            modelBuilder.Entity("STEMotion.Domain.Entities.ParentStudent", b =>
-                {
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("parent_id");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("student_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ParentId", "StudentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("ParentStudent", (string)null);
-                });
-
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
                     b.Property<Guid>("PaymentId")
@@ -387,6 +366,72 @@ namespace STEMotion.Infrastructure.Migrations
                     b.ToTable("Role", (string)null);
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
+                {
+                    b.Property<Guid>("StudentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("student_id")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("avatar_url");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("first_name");
+
+                    b.Property<int?>("GradeLevel")
+                        .HasColumnType("int")
+                        .HasColumnName("grade_level");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("last_name");
+
+                    b.Property<Guid>("ParentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("Password")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("password");
+
+                    b.Property<string>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Username")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("username");
+
+                    b.HasKey("StudentId");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Student_Username")
+                        .HasFilter("[username] IS NOT NULL");
+
+                    b.ToTable("Student", (string)null);
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.StudentProgress", b =>
                 {
                     b.Property<Guid>("StudentProgressId")
@@ -433,9 +478,14 @@ namespace STEMotion.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("student_id");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("StudentProgressId");
 
                     b.HasIndex("LessonId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("StudentId", "LessonId")
                         .IsUnique()
@@ -719,8 +769,8 @@ namespace STEMotion.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_GameResult.game_id");
 
-                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
-                        .WithMany()
+                    b.HasOne("STEMotion.Domain.Entities.Student", "Student")
+                        .WithMany("GameResults")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -755,27 +805,6 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("STEMotion.Domain.Entities.ParentStudent", b =>
-                {
-                    b.HasOne("STEMotion.Domain.Entities.User", "Parent")
-                        .WithMany("StudentRelations")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_ParentStudent.parent_id");
-
-                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
-                        .WithMany("ParentRelations")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_ParentStudent.student_id");
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("STEMotion.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("STEMotion.Domain.Entities.User", "User")
@@ -788,6 +817,18 @@ namespace STEMotion.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
+                {
+                    b.HasOne("STEMotion.Domain.Entities.User", "Parent")
+                        .WithMany("Students")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Student_parent_id");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.StudentProgress", b =>
                 {
                     b.HasOne("STEMotion.Domain.Entities.Lesson", "Lesson")
@@ -797,12 +838,16 @@ namespace STEMotion.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_StudentProgress_lesson_id");
 
-                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
+                    b.HasOne("STEMotion.Domain.Entities.Student", "Student")
                         .WithMany("StudentProgress")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_StudentProgress_student_id");
+
+                    b.HasOne("STEMotion.Domain.Entities.User", null)
+                        .WithMany("StudentProgress")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Lesson");
 
@@ -875,6 +920,13 @@ namespace STEMotion.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
+                {
+                    b.Navigation("GameResults");
+
+                    b.Navigation("StudentProgress");
+                });
+
             modelBuilder.Entity("STEMotion.Domain.Entities.Subject", b =>
                 {
                     b.Navigation("Chapters");
@@ -887,13 +939,11 @@ namespace STEMotion.Infrastructure.Migrations
 
             modelBuilder.Entity("STEMotion.Domain.Entities.User", b =>
                 {
-                    b.Navigation("ParentRelations");
-
                     b.Navigation("Payments");
 
                     b.Navigation("StudentProgress");
 
-                    b.Navigation("StudentRelations");
+                    b.Navigation("Students");
                 });
 #pragma warning restore 612, 618
         }

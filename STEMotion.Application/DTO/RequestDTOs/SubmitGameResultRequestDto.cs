@@ -8,6 +8,7 @@ namespace STEMotion.Application.DTO.RequestDTOs
 {
     public class SubmitGameResultRequestDto
     {
+        public Guid StudentId { get; set; }
         public Guid GameId { get; set; }
         public double Score { get; set; }
         public int CorrectAnswers { get; set; }
