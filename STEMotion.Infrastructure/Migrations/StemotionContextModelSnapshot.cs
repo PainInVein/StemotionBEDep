@@ -766,8 +766,8 @@ namespace STEMotion.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_GameResult.game_id");
 
-                    b.HasOne("STEMotion.Domain.Entities.User", "Student")
-                        .WithMany()
+                    b.HasOne("STEMotion.Domain.Entities.Student", "Student")
+                        .WithMany("GameResults")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -919,6 +919,8 @@ namespace STEMotion.Infrastructure.Migrations
 
             modelBuilder.Entity("STEMotion.Domain.Entities.Student", b =>
                 {
+                    b.Navigation("GameResults");
+
                     b.Navigation("StudentProgress");
                 });
 

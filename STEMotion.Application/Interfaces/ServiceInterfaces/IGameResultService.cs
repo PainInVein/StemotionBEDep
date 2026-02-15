@@ -19,5 +19,6 @@ namespace STEMotion.Application.Interfaces.ServiceInterfaces
         Task<StudentGameStatsResponseDTO> GetStudentGameStatsAsync(Guid studentId, Guid gameId);
         Task<GameResultResponseDTO> GetBestResultAsync(Guid studentId, Guid gameId);
         Task<int> GetAttemptCountAsync(Guid studentId, Guid gameId);
+        Task<IEnumerable<StudentLeaderboardDTO>> GetLeaderboardAsync(int limit);
     }
 }

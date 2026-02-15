@@ -25,8 +25,7 @@ namespace STEMotion.Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmitResult([FromBody] SubmitGameResultRequestDto submitRequest)
         {
-            var studentId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _gameResultService.SubmitResultAsync(studentId, submitRequest);
+            var result = await _gameResultService.SubmitResultAsync(submitRequest.StudentId, submitRequest);
             return Ok(ResponseDTO<GameResultResponseDTO>.Success(result, "Lưu kết quả thành công"));
         }
 
@@ -73,6 +72,14 @@ namespace STEMotion.Presentation.Controllers
             var studentId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var result = await _gameResultService.GetAttemptCountAsync(studentId, gameId);
             return Ok(ResponseDTO<int>.Success(result, "Lấy số lần chơi thành công"));
+        }
+
+        [EndpointDescription("API lấy bảng xếp hạng")]
+        [HttpGet("leaderboard")]
+        public async Task<IActionResult> GetLeaderboard([FromQuery] int limit = 10)
+        {
+            var result = await _gameResultService.GetLeaderboardAsync(limit);
+            return Ok(ResponseDTO<IEnumerable<StudentLeaderboardDTO>>.Success(result, "Lấy bảng xếp hạng thành công"));
         }
     }
 }

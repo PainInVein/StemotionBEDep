@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace STEMotion.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class ThanhDT_ErikDev : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -129,31 +129,6 @@ namespace STEMotion.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ParentStudent",
-                columns: table => new
-                {
-                    parent_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    student_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ParentStudent", x => new { x.parent_id, x.student_id });
-                    table.ForeignKey(
-                        name: "FK_ParentStudent.parent_id",
-                        column: x => x.parent_id,
-                        principalTable: "User",
-                        principalColumn: "userId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ParentStudent.student_id",
-                        column: x => x.student_id,
-                        principalTable: "User",
-                        principalColumn: "userId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Payment",
                 columns: table => new
                 {
@@ -170,6 +145,32 @@ namespace STEMotion.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Payment_UserId",
                         column: x => x.user_id,
+                        principalTable: "User",
+                        principalColumn: "userId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Student",
+                columns: table => new
+                {
+                    student_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    parent_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    first_name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    last_name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    avatar_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    grade_level = table.Column<int>(type: "int", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValue: "Active")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Student", x => x.student_id);
+                    table.ForeignKey(
+                        name: "FK_Student_parent_id",
+                        column: x => x.parent_id,
                         principalTable: "User",
                         principalColumn: "userId",
                         onDelete: ReferentialAction.Restrict);
@@ -295,11 +296,17 @@ namespace STEMotion.Infrastructure.Migrations
                     started_at = table.Column<DateTime>(type: "datetime2", nullable: true),
                     completed_at = table.Column<DateTime>(type: "datetime2", nullable: true),
                     last_accessed_at = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "NotStarted")
+                    status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "NotStarted"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudentProgress", x => x.student_progress_id);
+                    table.ForeignKey(
+                        name: "FK_StudentProgress_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "userId");
                     table.ForeignKey(
                         name: "FK_StudentProgress_lesson_id",
                         column: x => x.lesson_id,
@@ -309,8 +316,8 @@ namespace STEMotion.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_StudentProgress_student_id",
                         column: x => x.student_id,
-                        principalTable: "User",
-                        principalColumn: "userId",
+                        principalTable: "Student",
+                        principalColumn: "student_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -339,8 +346,8 @@ namespace STEMotion.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_GameResult.student_id",
                         column: x => x.student_id,
-                        principalTable: "User",
-                        principalColumn: "userId",
+                        principalTable: "Student",
+                        principalColumn: "student_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -397,11 +404,6 @@ namespace STEMotion.Infrastructure.Migrations
                 column: "lesson_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ParentStudent_student_id",
-                table: "ParentStudent",
-                column: "student_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Payment_user_id",
                 table: "Payment",
                 column: "user_id");
@@ -413,6 +415,18 @@ namespace STEMotion.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Student_parent_id",
+                table: "Student",
+                column: "parent_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Student_Username",
+                table: "Student",
+                column: "username",
+                unique: true,
+                filter: "[username] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentProgress_lesson_id",
                 table: "StudentProgress",
                 column: "lesson_id");
@@ -422,6 +436,11 @@ namespace STEMotion.Infrastructure.Migrations
                 table: "StudentProgress",
                 columns: new[] { "student_id", "lesson_id" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentProgress_UserId",
+                table: "StudentProgress",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subject_grade_id",
@@ -461,9 +480,6 @@ namespace STEMotion.Infrastructure.Migrations
                 name: "LessonContent");
 
             migrationBuilder.DropTable(
-                name: "ParentStudent");
-
-            migrationBuilder.DropTable(
                 name: "StudentProgress");
 
             migrationBuilder.DropTable(
@@ -471,6 +487,9 @@ namespace STEMotion.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Game");
+
+            migrationBuilder.DropTable(
+                name: "Student");
 
             migrationBuilder.DropTable(
                 name: "Payment");

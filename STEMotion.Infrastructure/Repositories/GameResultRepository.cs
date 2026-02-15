@@ -89,5 +89,38 @@ namespace STEMotion.Infrastructure.Repositories
                 .Distinct()
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<StudentLeaderboardDTO>> GetLeaderboardAsync(int limit)
+        {
+            var leaderboard = await _context.GameResults
+                .GroupBy(x => x.StudentId)
+                .Select(g => new
+                {
+                    StudentId = g.Key,
+                    TotalScore = g.Sum(x => x.Score)
+                })
+                .OrderByDescending(x => x.TotalScore)
+                .Take(limit)
+                .Join(_context.Students,
+                    stat => stat.StudentId,
+                    student => student.StudentId,
+                    (stat, student) => new StudentLeaderboardDTO
+                    {
+                        StudentId = student.StudentId,
+                        StudentName = student.FirstName + ' ' + student.LastName,
+                        AvatarUrl = student.AvatarUrl,
+                        TotalScore = stat.TotalScore,
+                        Rank = 0 // Will assign rank in memory if needed or here
+                    })
+                .ToListAsync();
+            
+            // Assign rank
+            for (int i = 0; i < leaderboard.Count; i++)
+            {
+                leaderboard[i].Rank = i + 1;
+            }
+
+            return leaderboard;
+        }
     }
 }
