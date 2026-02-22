@@ -39,7 +39,7 @@ namespace STEMotion.Infrastructure.Repositories
         /// <returns>Tiến độ học của sinh viên trong một bài học</returns>
         public async Task<StudentProgress?> GetProgressByStudentAndLessonAsync(Guid studentId, Guid lessonId)
         {
-            return await FindByCondition(x => x.StudentId == studentId && x.Lesson.LessonId == lessonId, false)
+            return await FindByCondition(x => x.StudentId == studentId && x.Lesson.LessonId == lessonId, true)
                          .Include(x => x.Lesson)
                          .FirstOrDefaultAsync();
         }

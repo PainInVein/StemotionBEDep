@@ -51,7 +51,7 @@ namespace STEMotion.Application.Services
                     existingProgress.Status = "in_progress";
                 }
 
-                _unitOfWork.StudentProgressRepository.Update(existingProgress);
+                //_unitOfWork.StudentProgressRepository.Update(existingProgress);
                 await _unitOfWork.SaveChangesAsync();
                 
                 return _mapper.Map<LessonProgressResponseDTO>(existingProgress);
@@ -123,7 +123,7 @@ namespace STEMotion.Application.Services
                 progress.Status = completionPercentage > 0 ? "in_progress" : "in_progress";
             }
 
-            _unitOfWork.StudentProgressRepository.Update(progress);
+            //_unitOfWork.StudentProgressRepository.Update(progress);
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<LessonProgressResponseDTO>(progress);
