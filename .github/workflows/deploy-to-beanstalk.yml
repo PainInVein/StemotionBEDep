@@ -29,7 +29,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish the app
-        run: dotnet publish -c Release -o ./publish
+        run: dotnet publish STEMotion.API/STEMotion.API.csproj -c Release -o publish
 
       - name: Zip the published files
         run: |
