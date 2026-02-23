@@ -51,7 +51,7 @@ namespace STEMotion.Application.Services
                     existingProgress.Status = "in_progress";
                 }
 
-                //_unitOfWork.StudentProgressRepository.Update(existingProgress);
+                //_unitOfWork.StudentProgressRepository.Update(existingProgress)
                 await _unitOfWork.SaveChangesAsync();
                 
                 return _mapper.Map<LessonProgressResponseDTO>(existingProgress);
