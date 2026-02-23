@@ -1,0 +1,53 @@
+name: Deploy .NET API to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches: [ main ]        
+
+env:
+  AWS_REGION: ap-southeast-2                 
+  APPLICATION_NAME: exe-fpt-api  
+  ENVIRONMENT_NAME: Exe-fpt-api-env   
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write    
+      contents: read
+
+    steps:
+      - name: Checkout your code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Publish the app
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Zip the published files
+        run: |
+          cd publish
+          zip -r ../deploy.zip .
+          cd ..
+
+      - name: Configure AWS credentials (using OIDC - secure & free)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}   
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to Elastic Beanstalk
+        uses: aws-actions/aws-elasticbeanstalk-deploy@v1.0.0   
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          application-name: ${{ env.APPLICATION_NAME }}
+          environment-name: ${{ env.ENVIRONMENT_NAME }}
+          deployment-package-path: deploy.zip
+         
